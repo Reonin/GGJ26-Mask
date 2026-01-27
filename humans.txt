@@ -1,0 +1,18 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM <Project Plague>
+
+    <Corey Jeffers> -- <Developer> -- <roninrampant>
+    <Blake> -- <Developer> 
+    <Tim>-- <Developer> 
+    <Aditya>-- <Developer> 
+
+# THANKS
+
+    <name>
+
+# TECHNOLOGY COLOPHON
+
+    CSS3, HTML5, Javascript
+    Modernizr, Normalize.css
