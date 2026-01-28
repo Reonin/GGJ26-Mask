@@ -1,4 +1,6 @@
 import { createPlagueDoctor } from './plagueDoctor.js';
+import { createTable } from './table.js';
+import { createVictim } from './victim.js';
 
 export function init() {
 
@@ -25,6 +27,12 @@ export function init() {
 
         // Create the plague doctor placeholder
         const plagueDoctor = createPlagueDoctor(scene);
+
+        // Create the table placeholder
+        const table = createTable(scene);
+
+        // Create the victim placeholder on the table
+        const victim = createVictim(scene);
 
         return scene;
     };
