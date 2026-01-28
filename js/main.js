@@ -1,3 +1,5 @@
+import { createPlagueDoctor } from './plagueDoctor.js';
+
 export function init() {
 
     const canvas = document.getElementById("renderCanvas"); // Get the canvas element
@@ -18,13 +20,11 @@ export function init() {
         // Dim the light a small amount - 0 to 1
         light.intensity = 0.5;
 
-        // Our built-in 'sphere' shape.
-        const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2, segments: 32}, scene);
-        // Move the sphere upward 1/2 its height
-        sphere.position.y = 1;
-
         // Our built-in 'ground' shape.
-        const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 6, height: 6}, scene);
+        const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
+
+        // Create the plague doctor placeholder
+        const plagueDoctor = createPlagueDoctor(scene);
 
         return scene;
     };
