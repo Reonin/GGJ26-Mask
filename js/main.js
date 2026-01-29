@@ -2,6 +2,7 @@ import { createDancingSprite } from './scripts/danceLoop.js'
 import { createTable } from './table.js';
 import { createVictim } from './victim.js';
 
+let audioManager;
 export function init() {
     const canvas = document.getElementById("renderCanvas");
     const engine = new BABYLON.Engine(canvas, true, { stencil: true });
@@ -31,7 +32,7 @@ export function init() {
         engine.runRenderLoop(function () {
             scene.render();
         });
-        
+
         scene.onKeyboardObservable.add((kbInfo) => {
             if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYDOWN) {
                 console.log("KEY DOWN: ", kbInfo.event.key);
