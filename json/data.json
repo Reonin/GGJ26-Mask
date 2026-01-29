@@ -1,0 +1,17 @@
+{
+    "1": {
+        "challenge": "poop",
+        "handPlacement": "right",
+        "difficulty": "easy"
+    },
+    "2": {
+        "challenge": "cure",
+        "handPlacement": "left",
+        "difficulty": "easy"
+    },
+    "3": {
+        "challenge": "garlic",
+        "handPlacement": "center",
+        "difficulty": "easy"
+    }
+}
