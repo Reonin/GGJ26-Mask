@@ -7,7 +7,7 @@ export function createVictim(scene) {
     }, scene);
 
     // Scale to make it an oval (long and narrow)
-    victim.scaling = new BABYLON.Vector3(3.5, 1, 1.5);
+    victim.scaling = new BABYLON.Vector3(3.5, 1.5, 1.5);
 
     // Rotate to lay flat on the table (face up toward camera)
     victim.rotation.x = Math.PI / 2;
