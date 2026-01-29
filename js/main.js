@@ -3,6 +3,7 @@ import { createTable } from './table.js';
 import { createVictim } from './victim.js';
 import { AudioManager } from './AudioManager.js';
 import { GameManager } from './Dictionary.js';
+import { HandMotions } from './HandMotions.js';
 
 const gameManager = new GameManager();
 export function init() {
@@ -16,7 +17,7 @@ export function init() {
         camera.setTarget(BABYLON.Vector3.Zero());
         
         const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, -0.400), scene);
-        light.intensity = 0.5;
+        light.intensity = 0.25;
         
         const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
         
@@ -26,9 +27,10 @@ export function init() {
         const table = createTable(scene);
         const victim = createVictim(scene);
 
+        const handMotions = new HandMotions(BABYLON, scene);
    
         const audioManager = new AudioManager(BABYLON, scene);
-       
+    
         return scene;
     };
     
