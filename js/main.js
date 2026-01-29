@@ -1,6 +1,5 @@
 import { createPlagueDoctor } from './plagueDoctor.js';
-import { createTable } from './table.js';
-import { createVictim } from './victim.js';
+import { createPatientQueue, transitionToNextPatient } from './patientQueue.js';
 import { AudioManager } from './AudioManager.js';
 
 let audioManager;
@@ -30,27 +29,23 @@ export function init() {
         // Create the plague doctor placeholder
         const plagueDoctor = createPlagueDoctor(scene);
 
-        // Create the table placeholder
-        const table = createTable(scene);
-
-        // Create the victim placeholder on the table
-        const victim = createVictim(scene);
-
+        // Create the patient queue (table + victim)
+        const patientQueue = createPatientQueue(scene);
 
         audioManager = new AudioManager(BABYLON, scene);
-       
-        return scene;
+
+        return { scene, patientQueue };
     };
 
 
     const PromiseScene = createScene(); //Call the createScene function that returns a promise
-    PromiseScene.then(scene => {
+    PromiseScene.then(({ scene, patientQueue }) => {
         // scene.debugLayer.show();//show debugger
         // Register a render loop to repeatedly render the scene
         engine.runRenderLoop(function () {
             scene.render();
         });
-        
+
         scene.onKeyboardObservable.add((kbInfo) => {
             if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYDOWN) {
                 console.log("KEY DOWN: ", kbInfo.event.key);
@@ -61,7 +56,8 @@ export function init() {
                         break;
                     case 'S':
                     case 's':
-                        
+                        // Transition to next patient
+                        transitionToNextPatient(scene, patientQueue);
                         break;
                     case 'D':
                     case 'd':
@@ -69,7 +65,7 @@ export function init() {
                 }
             }
             else if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYUP) {
-               
+
             }
         });
 
