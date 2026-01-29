@@ -1,8 +1,10 @@
 import { createDancingSprite } from './scripts/danceLoop.js'
 import { createTable } from './table.js';
 import { createVictim } from './victim.js';
+import { AudioManager } from './AudioManager.js';
+import { GameManager } from './Dictionary.js';
 
-let audioManager;
+const gameManager = new GameManager();
 export function init() {
     const canvas = document.getElementById("renderCanvas");
     const engine = new BABYLON.Engine(canvas, true, { stencil: true });
@@ -23,7 +25,10 @@ export function init() {
         
         const table = createTable(scene);
         const victim = createVictim(scene);
-        
+
+   
+        const audioManager = new AudioManager(BABYLON, scene);
+       
         return scene;
     };
     
@@ -32,7 +37,8 @@ export function init() {
         engine.runRenderLoop(function () {
             scene.render();
         });
-
+        
+       
         scene.onKeyboardObservable.add((kbInfo) => {
             if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYDOWN) {
                 console.log("KEY DOWN: ", kbInfo.event.key);
@@ -45,6 +51,9 @@ export function init() {
                         break;
                     case 'D':
                     case 'd':
+                        break;
+                    case ' ':
+                        gameManager.changeRound(1, true);
                         break;
                 }
             }
