@@ -1,7 +1,9 @@
 import { createPlagueDoctor } from './plagueDoctor.js';
 import { createTable } from './table.js';
 import { createVictim } from './victim.js';
+import { AudioManager } from './AudioManager.js';
 
+let audioManager;
 export function init() {
 
     const canvas = document.getElementById("renderCanvas"); // Get the canvas element
@@ -34,6 +36,9 @@ export function init() {
         // Create the victim placeholder on the table
         const victim = createVictim(scene);
 
+
+        audioManager = new AudioManager(BABYLON, scene);
+       
         return scene;
     };
 
@@ -52,7 +57,7 @@ export function init() {
                 switch (kbInfo.event.key) {
                     case 'A':
                     case 'a':
-                       
+                        audioManager.error.then(s => s.play());
                         break;
                     case 'S':
                     case 's':
