@@ -4,6 +4,7 @@ import { createVictim } from './victim.js';
 import { AudioManager } from './AudioManager.js';
 import { GameManager } from './Dictionary.js';
 import { HandMotions } from './HandMotions.js';
+import { createToolManager } from './tools.js';
 
 const gameManager = new GameManager();
 export function init() {
@@ -28,19 +29,21 @@ export function init() {
         const victim = createVictim(scene);
 
         const handMotions = new HandMotions(BABYLON, scene);
-   
+
         const audioManager = new AudioManager(BABYLON, scene);
-    
-        return scene;
+
+        // Create tool manager (tools spawn on demand)
+        const toolManager = createToolManager(scene);
+
+        return { scene, toolManager };
     };
     
     const PromiseScene = createScene();
-    PromiseScene.then(scene => {
+    PromiseScene.then(({ scene, toolManager }) => {
         engine.runRenderLoop(function () {
             scene.render();
         });
-        
-       
+
         scene.onKeyboardObservable.add((kbInfo) => {
             if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYDOWN) {
                 console.log("KEY DOWN: ", kbInfo.event.key);
@@ -56,6 +59,16 @@ export function init() {
                         break;
                     case ' ':
                         gameManager.changeRound(1, true);
+                        break;
+                    case 'T':
+                    case 't':
+                        // Test: spawn a tool
+                        toolManager.spawnTool();
+                        break;
+                    case 'R':
+                    case 'r':
+                        // Test: remove a random tool
+                        toolManager.removeRandomTool();
                         break;
                 }
             }
