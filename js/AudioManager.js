@@ -36,6 +36,12 @@ export class AudioManager {
       volume: 1.0,
     });
 
+     this.theme = new this.BABYLON.CreateSoundAsync("error", "./audio/plaguarism-theme.wav",{
+      loop: true,
+      autoplay: true,
+      volume: 1.0,
+    });
+
     /***Alphabet Sounds */
 
     const soundMap = {
