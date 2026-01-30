@@ -4,6 +4,7 @@ import { createVictim } from './victim.js';
 import { AudioManager } from './AudioManager.js';
 import { GameManager } from './Dictionary.js';
 import { HandMotions } from './HandMotions.js';
+import {setUpHUD, hideTitleScreen} from './HUDConfig.js';
 
 const gameManager = new GameManager();
 export function init() {
@@ -19,6 +20,9 @@ export function init() {
         const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, -0.400), scene);
         light.intensity = 0.25;
         
+        //GUI
+        const HUD = setUpHUD(BABYLON, scene);
+
         const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
         
         // Create the dancing sprite instead of plague doctor
@@ -55,6 +59,7 @@ export function init() {
                     case 'd':
                         break;
                     case ' ':
+                        hideTitleScreen();
                         gameManager.changeRound(1, true);
                         break;
                 }
