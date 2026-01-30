@@ -8,49 +8,23 @@ import {setUpHUD, hideTitleScreen} from './HUDConfig.js';
 import { createToolManager } from './tools.js';
 import { TypingTest } from './scripts/typingTest.js';
 
-const gameManager = new GameManager();
-let audioManager;
-export function init() {
+export class Main {
+constructor() {
+    this.audioManager;
+    this.gameManager = new GameManager();
+    this.light;
+
     const canvas = document.getElementById("renderCanvas");
-    const engine = new BABYLON.Engine(canvas, true, { stencil: true });
+    this.engine = new BABYLON.Engine(canvas, true, { stencil: true });
     document.body.style.cursor = "none";
 
     //create typing test
     const typingTest = new TypingTest('js/data/wordBank.json');
     
-    const createScene = async function () {
-        const scene = new BABYLON.Scene(engine);
-        
-        const camera = new BABYLON.UniversalCamera("camera", new BABYLON.Vector3(0, 15, 0), scene);
-        camera.setTarget(BABYLON.Vector3.Zero());
-        
-        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, -0.400), scene);
-        light.intensity = 0.25;
-        
-        //GUI
-        const HUD = setUpHUD(BABYLON, scene);
-
-        const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
-        
-        // Create the dancing plague doctor
-        const dancer = createDancingSprite(scene);
-        
-        const table = createTable(scene);
-        const victim = createVictim(scene);
-
-        const handMotions = new HandMotions(BABYLON, scene);
-
-        audioManager = new AudioManager(BABYLON, scene);
-
-        // Create tool manager (tools spawn on demand)
-        const toolManager = createToolManager(scene);
-
-        return { scene, toolManager };
-    };
     
-    const PromiseScene = createScene();
+    const PromiseScene = this.createScene();
     PromiseScene.then(({ scene, toolManager }) => {
-        engine.runRenderLoop(function () {
+        this.engine.runRenderLoop(function () {
             scene.render();
         });
 
@@ -58,7 +32,7 @@ export function init() {
             if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYDOWN) {
                 console.log("KEY DOWN: ", kbInfo.event.key);
                 if (/^[a-zA-Z]$/.test(kbInfo.event.key)) {
-                    audioManager.playKey(kbInfo.event.key.toLowerCase());
+                    this.audioManager.playKey(kbInfo.event.key.toLowerCase());
                 }
                 switch (kbInfo.event.key) {
                     case 'A':
@@ -71,8 +45,8 @@ export function init() {
                     case 'd':
                         break;
                     case ' ':
-                        hideTitleScreen();
-                        gameManager.changeRound(1, true);
+                        hideTitleScreen(this.light);
+                        this.gameManager.changeRound(1, true);
                         break;
                     case 'T':
                     case 't':
@@ -84,12 +58,72 @@ export function init() {
                         // Test: remove a random tool
                         toolManager.removeRandomTool();
                         break;
+                    case '`':
+                        this.#toggleDebugger(scene);
+                        break;
                 }
             }
         });
     });
+
+   this.boundResizeHandler = this.#handleResize.bind(this);
+   window.addEventListener('resize', this.boundResizeHandler);
     
-    window.addEventListener("resize", function () {
-        engine.resize();
-    });
+}
+
+    #handleResize(event) {
+        this.engine.resize();
+    }
+
+    #setupCamera(scene){
+        var renderWidth = 1920;
+        var renderHeight = 1080;
+        const scale = 128;
+        const camera = new BABYLON.UniversalCamera("camera", new BABYLON.Vector3(0, 15, 0), scene);
+        camera.setTarget(BABYLON.Vector3.Zero());
+        camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
+        camera.orthoLeft = -renderWidth / scale;
+        camera.orthoRight = renderWidth / scale;
+        camera.orthoTop = renderHeight / scale;
+        camera.orthoBottom = -renderHeight / scale;
+    }
+
+    async createScene() {
+        const scene = new BABYLON.Scene(this.engine);
+        scene.clearColor = BABYLON.Color3.Black();
+
+        this.#setupCamera(scene);
+
+        this.light = new BABYLON.RectAreaLight("light", new BABYLON.Vector3(0, 1, 10), 3, 10, scene);
+        this.light.intensity = 0.35;
+        
+        //GUI
+        const HUD = setUpHUD(BABYLON, scene, this.light);
+
+        const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
+        
+        // Create the dancing plague doctor
+        const dancer = createDancingSprite(scene);
+        
+        const table = createTable(scene);
+        const victim = createVictim(scene);
+
+        const handMotions = new HandMotions(BABYLON, scene);
+
+        this.audioManager = new AudioManager(BABYLON, scene);
+
+        // Create tool manager (tools spawn on demand)
+        const toolManager = createToolManager(scene);
+
+        return { scene, toolManager };
+    };
+   
+    #toggleDebugger(scene) {
+        if(scene.debugLayer.isVisible()){
+            scene.debugLayer.hide();
+        }else {
+            scene.debugLayer.show();
+            document.body.style.cursor = "revert";
+        }
+    }
 }
