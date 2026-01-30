@@ -5,11 +5,16 @@ import { AudioManager } from './AudioManager.js';
 import { GameManager } from './Dictionary.js';
 import { HandMotions } from './HandMotions.js';
 import {setUpHUD, hideTitleScreen} from './HUDConfig.js';
+import { createToolManager } from './tools.js';
+import { TypingTest } from './scripts/typingTest.js';
 
 const gameManager = new GameManager();
 export function init() {
     const canvas = document.getElementById("renderCanvas");
     const engine = new BABYLON.Engine(canvas, true, { stencil: true });
+
+    //create typing test
+    const typingTest = new TypingTest('js/data/wordBank.json');
     
     const createScene = async function () {
         const scene = new BABYLON.Scene(engine);
@@ -25,26 +30,28 @@ export function init() {
 
         const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
         
-        // Create the dancing sprite instead of plague doctor
-        const dancer = createDancingSprite(scene);  // Change this line
+        // Create the dancing plague doctor
+        const dancer = createDancingSprite(scene);
         
         const table = createTable(scene);
         const victim = createVictim(scene);
 
         const handMotions = new HandMotions(BABYLON, scene);
-   
+
         const audioManager = new AudioManager(BABYLON, scene);
-    
-        return scene;
+
+        // Create tool manager (tools spawn on demand)
+        const toolManager = createToolManager(scene);
+
+        return { scene, toolManager };
     };
     
     const PromiseScene = createScene();
-    PromiseScene.then(scene => {
+    PromiseScene.then(({ scene, toolManager }) => {
         engine.runRenderLoop(function () {
             scene.render();
         });
-        
-       
+
         scene.onKeyboardObservable.add((kbInfo) => {
             if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYDOWN) {
                 console.log("KEY DOWN: ", kbInfo.event.key);
@@ -61,6 +68,16 @@ export function init() {
                     case ' ':
                         hideTitleScreen();
                         gameManager.changeRound(1, true);
+                        break;
+                    case 'T':
+                    case 't':
+                        // Test: spawn a tool
+                        toolManager.spawnTool();
+                        break;
+                    case 'R':
+                    case 'r':
+                        // Test: remove a random tool
+                        toolManager.removeRandomTool();
                         break;
                 }
             }
