@@ -13,6 +13,7 @@ let audioManager;
 export function init() {
     const canvas = document.getElementById("renderCanvas");
     const engine = new BABYLON.Engine(canvas, true, { stencil: true });
+    document.body.style.cursor = "none";
 
     //create typing test
     const typingTest = new TypingTest('js/data/wordBank.json');
@@ -56,7 +57,9 @@ export function init() {
         scene.onKeyboardObservable.add((kbInfo) => {
             if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYDOWN) {
                 console.log("KEY DOWN: ", kbInfo.event.key);
-                audioManager.playKey(kbInfo.event.key);
+                if (/^[a-zA-Z]$/.test(kbInfo.event.key)) {
+                    audioManager.playKey(kbInfo.event.key.toLowerCase());
+                }
                 switch (kbInfo.event.key) {
                     case 'A':
                     case 'a':
