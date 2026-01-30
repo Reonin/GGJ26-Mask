@@ -16,7 +16,7 @@ const HUD = {
     currentRound
 }
 
-export async function setUpHUD(BABYLON, scene, light){
+export async function setUpHUD(BABYLON, scene, light, engine){
     let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI", true, scene, BABYLON.Texture.NEAREST_NEAREST);
     let loadedGUI = await advancedTexture.parseFromURLAsync("./json/guiTexture.json");
     
@@ -28,8 +28,8 @@ export async function setUpHUD(BABYLON, scene, light){
     HUD.subtitle = advancedTexture.getControlByName("Subtitle");
     HUD.challenge = advancedTexture.getControlByName("challenge");
    
-
-
+    setupTimer(scene, engine,HUD.challenge);
+    
     return HUD;
 }
 
@@ -41,6 +41,27 @@ function setUpButtons(advancedTexture, buttonList, light) {
     });
 }
 
+
+function setupTimer(scene, engine, target){
+    let timeElapsed = 0;
+    const targetTime = 300; // 5 mins
+    // Register an observer to update the time every frame
+    scene.onBeforeRenderObservable.add(() => {
+        // getDeltaTime() returns the time in milliseconds since the last frame
+        timeElapsed += engine.getDeltaTime() / 1000; // Convert to seconds
+
+        if (timeElapsed >= targetTime) {
+            target.text = "Time's Up!";
+            // Stop the timer by removing the observer
+            scene.onBeforeRenderObservable.remove(this);
+            // Add your end-of-game logic here
+        } else {
+            // Display the time, formatted to one decimal place
+            target.text = `Time: ${timeElapsed.toFixed(1)}s`;
+        }
+    });
+
+}
 
 export function hideTitleScreen(light) {
         HUD.title.isVisible = false;

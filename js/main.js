@@ -98,7 +98,7 @@ constructor() {
         this.light.intensity = 0.35;
         
         //GUI
-        const HUD = setUpHUD(BABYLON, scene, this.light);
+        const HUD = setUpHUD(BABYLON, scene, this.light, this.engine);
 
         const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
         
