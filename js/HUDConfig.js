@@ -16,20 +16,20 @@ const HUD = {
     currentRound
 }
 
-export async function setUpHUD(BABYLON, scene, light, engine){
+export async function setUpHUD(BABYLON, scene, light, engine, typingTest){
     let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI", true, scene, BABYLON.Texture.NEAREST_NEAREST);
     let loadedGUI = await advancedTexture.parseFromURLAsync("./json/guiTexture.json");
     
     setUpButtons(advancedTexture, buttonList, light);
 
     HUD.playerScore = advancedTexture.getControlByName("PlayerScore");
-    HUD.scoreLabel = advancedTexture.getControlByName("scoreLabel");
+    HUD.scoreLabel = advancedTexture.getControlByName("ScoreLabel");
     HUD.title = advancedTexture.getControlByName("Title");
     HUD.subtitle = advancedTexture.getControlByName("Subtitle");
     HUD.challenge = advancedTexture.getControlByName("challenge");
    
-    setupTimer(scene, engine,HUD.challenge);
-    
+    setupTimer(scene, engine, HUD.challenge);
+    setupScore(scene, typingTest, HUD.playerScore);
     return HUD;
 }
 
@@ -40,7 +40,14 @@ function setUpButtons(advancedTexture, buttonList, light) {
         console.log("%cStart Game Pressed", "color:green");
     });
 }
-
+function setupScore(scene, typingTest, target){
+     scene.onBeforeRenderObservable.add(() => {
+        if(window.gameStarted){
+            const stats = typingTest.getStats();
+            target.text = stats.correctWords;
+        }
+    });
+}
 
 function setupTimer(scene, engine, target){
     let timeElapsed = 0;

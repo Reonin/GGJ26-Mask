@@ -19,7 +19,7 @@ constructor() {
     document.body.style.cursor = "none";
 
     //create typing test
-    const typingTest = new TypingTest('js/data/wordBank.json');
+    this.typingTest = new TypingTest('js/data/wordBank.json');
     
     
     const PromiseScene = this.createScene();
@@ -98,7 +98,7 @@ constructor() {
         this.light.intensity = 0.35;
         
         //GUI
-        const HUD = setUpHUD(BABYLON, scene, this.light, this.engine);
+        const HUD = setUpHUD(BABYLON, scene, this.light, this.engine, this.typingTest);
 
         const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
         
