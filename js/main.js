@@ -9,6 +9,7 @@ import { createToolManager } from './tools.js';
 import { TypingTest } from './scripts/typingTest.js';
 
 const gameManager = new GameManager();
+let audioManager;
 export function init() {
     const canvas = document.getElementById("renderCanvas");
     const engine = new BABYLON.Engine(canvas, true, { stencil: true });
@@ -38,7 +39,7 @@ export function init() {
 
         const handMotions = new HandMotions(BABYLON, scene);
 
-        const audioManager = new AudioManager(BABYLON, scene);
+        audioManager = new AudioManager(BABYLON, scene);
 
         // Create tool manager (tools spawn on demand)
         const toolManager = createToolManager(scene);
@@ -55,6 +56,7 @@ export function init() {
         scene.onKeyboardObservable.add((kbInfo) => {
             if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYDOWN) {
                 console.log("KEY DOWN: ", kbInfo.event.key);
+                audioManager.playKey(kbInfo.event.key);
                 switch (kbInfo.event.key) {
                     case 'A':
                     case 'a':
