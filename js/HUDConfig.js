@@ -47,17 +47,19 @@ function setupTimer(scene, engine, target){
     const targetTime = 300; // 5 mins
     // Register an observer to update the time every frame
     scene.onBeforeRenderObservable.add(() => {
-        // getDeltaTime() returns the time in milliseconds since the last frame
-        timeElapsed += engine.getDeltaTime() / 1000; // Convert to seconds
+        if(window.gameStarted){
+            // getDeltaTime() returns the time in milliseconds since the last frame
+            timeElapsed += engine.getDeltaTime() / 1000; // Convert to seconds
 
-        if (timeElapsed >= targetTime) {
-            target.text = "Time's Up!";
-            // Stop the timer by removing the observer
-            scene.onBeforeRenderObservable.remove(this);
-            // Add your end-of-game logic here
-        } else {
-            // Display the time, formatted to one decimal place
-            target.text = `Time: ${timeElapsed.toFixed(1)}s`;
+            if (timeElapsed >= targetTime) {
+                target.text = "Time's Up!";
+                // Stop the timer by removing the observer
+                scene.onBeforeRenderObservable.remove(this);
+                // Add your end-of-game logic here
+            } else {
+                // Display the time, formatted to one decimal place
+                target.text = `Time: ${timeElapsed.toFixed(1)}s`;
+            }
         }
     });
 
@@ -66,7 +68,7 @@ function setupTimer(scene, engine, target){
 export function hideTitleScreen(light) {
         HUD.title.isVisible = false;
         HUD.subtitle.isVisible = false;
-
+        window.gameStarted = true;
         buttonList.startGameButton.isVisible = false;
         light.width = 30;
         light.intensity = 1.55;
