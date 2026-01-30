@@ -27,3 +27,4 @@ S: pfiu.mp3 by elmomo | License: Attribution NonCommercial 4.0 | Timestamp: 2026
 S: bing.wav by Syna-Max | License: Attribution NonCommercial 4.0 | Timestamp: 2026-01-30 04:30:40.892137+00:00
 S: claves_hit04.wav by soundbytez | License: Attribution 3.0 | Timestamp: 2026-01-30 04:29:28.886256+00:00
 S: PC Sloppy Bass.wav by medetix | License: Creative Commons 0 | Timestamp: 2026-01-30 04:28:48.938069+00:00
+S: paper_rub.wav by LloydEvans09 -- https://freesound.org/s/221493/ -- License: Attribution NonCommercial 4.0
