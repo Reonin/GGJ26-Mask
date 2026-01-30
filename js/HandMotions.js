@@ -2,12 +2,15 @@ export class HandMotions {
     constructor(BABYLON, scene){
         const gloveColor = new BABYLON.Color3(1, 1, 1);
         const gloveMaterial = new BABYLON.StandardMaterial("material", scene);
-        gloveMaterial.diffuseColor = gloveColor; // Red color for visibility
-        // gloveMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
+        gloveMaterial.albedoColor = gloveColor; // Red color for visibility
+        gloveMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
+   
 
-        const followingMesh = BABYLON.MeshBuilder.CreateSphere("followingMesh", {diameter: 0.4}, scene);
+        const followingMesh = BABYLON.MeshBuilder.CreateSphere("followingMesh", {diameter: 0.4 } , scene);
+        // followingMesh.rotation.x = 82.4000;
         followingMesh.material = gloveMaterial;
-        
+
+
         const fingers = [];
         for (let index = 0; index < 5; index++) {
             var finger = BABYLON.MeshBuilder.CreateSphere("ellipsoid", {
@@ -19,6 +22,7 @@ export class HandMotions {
             finger.setParent(followingMesh);
             finger.position.z = -0.25; 
             fingers.push(finger);
+            finger.enableEdgesRendering();
             
         }
         

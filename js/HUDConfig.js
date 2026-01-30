@@ -16,11 +16,11 @@ const HUD = {
     currentRound
 }
 
-export async function setUpHUD(BABYLON, scene){
+export async function setUpHUD(BABYLON, scene, light){
     let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI", true, scene, BABYLON.Texture.NEAREST_NEAREST);
     let loadedGUI = await advancedTexture.parseFromURLAsync("./json/guiTexture.json");
     
-    setUpButtons(advancedTexture, buttonList);
+    setUpButtons(advancedTexture, buttonList, light);
 
     HUD.playerScore = advancedTexture.getControlByName("PlayerScore");
     HUD.scoreLabel = advancedTexture.getControlByName("scoreLabel");
@@ -33,18 +33,20 @@ export async function setUpHUD(BABYLON, scene){
     return HUD;
 }
 
-function setUpButtons(advancedTexture, buttonList) {
+function setUpButtons(advancedTexture, buttonList, light) {
     buttonList.startGameButton = advancedTexture.getControlByName("Start Game");
     buttonList.startGameButton.onPointerUpObservable.add(function () {
-        hideTitleScreen();
+        hideTitleScreen(light);
         console.log("%cStart Game Pressed", "color:green");
     });
 }
 
 
-export function hideTitleScreen() {
+export function hideTitleScreen(light) {
         HUD.title.isVisible = false;
         HUD.subtitle.isVisible = false;
 
         buttonList.startGameButton.isVisible = false;
+        light.width = 30;
+        light.intensity = 1.55;
 }

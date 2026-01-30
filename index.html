@@ -51,9 +51,9 @@
             hostPath = '/GGJ26';
         }
 
-        let { init } = await import( hostPath + '/js/main.js');
+        let { Main } = await import( hostPath + '/js/main.js');
 
-        init();
+        const init = new Main();
     </script>
 </body>
 
