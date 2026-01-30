@@ -5,11 +5,15 @@ import { AudioManager } from './AudioManager.js';
 import { GameManager } from './Dictionary.js';
 import { HandMotions } from './HandMotions.js';
 import { createToolManager } from './tools.js';
+import { TypingTest } from './scripts/typingTest.js';
 
 const gameManager = new GameManager();
 export function init() {
     const canvas = document.getElementById("renderCanvas");
     const engine = new BABYLON.Engine(canvas, true, { stencil: true });
+
+    //create typing test
+    const typingTest = new TypingTest('js/data/wordBank.json');
     
     const createScene = async function () {
         const scene = new BABYLON.Scene(engine);
@@ -22,8 +26,8 @@ export function init() {
         
         const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
         
-        // Create the dancing sprite instead of plague doctor
-        const dancer = createDancingSprite(scene);  // Change this line
+        // Create the dancing plague doctor
+        const dancer = createDancingSprite(scene);
         
         const table = createTable(scene);
         const victim = createVictim(scene);

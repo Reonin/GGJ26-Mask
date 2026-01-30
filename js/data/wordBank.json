@@ -1,0 +1,42 @@
+{
+    "1": {
+        "challenge": "Caput",
+        "handPlacement": "right",
+        "difficulty": "easy"
+    },
+    "2": {
+        "challenge": "Digitus",
+        "handPlacement": "left",
+        "difficulty": "easy"
+    },
+    "3": {
+        "challenge": "Manus",
+        "handPlacement": "right",
+        "difficulty": "easy"
+    },
+    "4": {
+        "challenge": "Pulmo",
+        "handPlacement": "both",
+        "difficulty": "medium"
+    },
+    "5": {
+        "challenge": "Abdomen",
+        "handPlacement": "both",
+        "difficulty": "medium"
+    },
+    "6": {
+        "challenge": "Corpus",
+        "handPlacement": "both",
+        "difficulty": "medium"
+    },
+    "7": {
+        "challenge": "Genu",
+        "handPlacement": "both",
+        "difficulty": "hard"
+    },
+    "8": {
+        "challenge": "Vena",
+        "handPlacement": "both",
+        "difficulty": "hard"
+    }
+}
