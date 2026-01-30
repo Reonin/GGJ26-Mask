@@ -7,19 +7,21 @@ export class HandMotions {
 
         const followingMesh = BABYLON.MeshBuilder.CreateSphere("followingMesh", {diameter: 0.4}, scene);
         followingMesh.material = gloveMaterial;
-        
+        followingMesh.isPickable = false;
+
         const fingers = [];
         for (let index = 0; index < 5; index++) {
             var finger = BABYLON.MeshBuilder.CreateSphere("ellipsoid", {
-                diameterX: 0.05, 
-                diameterY: 0.05, 
-                diameterZ: 0.5, 
+                diameterX: 0.05,
+                diameterY: 0.05,
+                diameterZ: 0.5,
             }, scene);
             finger.material = gloveMaterial;
             finger.setParent(followingMesh);
-            finger.position.z = -0.25; 
+            finger.position.z = -0.25;
+            finger.isPickable = false;
             fingers.push(finger);
-            
+
         }
         
         fingers[0].position.x = 0; // middle
@@ -32,8 +34,8 @@ export class HandMotions {
 
 
         scene.onPointerMove = function (evt) {
-            // Use scene.pick() with the mouse's clientX and clientY coordinates
-            const pickResult = scene.pick(evt.clientX, evt.clientY);
+            // Use scene.pick() with predicate to only pick the ground
+            const pickResult = scene.pick(evt.clientX, evt.clientY, (mesh) => mesh.name === "ground");
             // console.log(followingMesh.position.x)
             if(followingMesh.position.x > 2){
                  console.log("%c Left", "color: orange; font-size: 20px; font-weight: bold;");
@@ -42,7 +44,7 @@ export class HandMotions {
             }else {
                 console.log("%c Center", "color: white; font-size: 20px; font-weight: bold;");
             }
-            // Check if the ray intersected with a mesh (ideally the ground)
+            // Check if the ray intersected with the ground
             if (pickResult.hit) {
                 // Update the position of the following mesh to the picked point
                 followingMesh.position.x = pickResult.pickedPoint.x;
@@ -55,6 +57,7 @@ export class HandMotions {
 
         // Assuming 'scene' is your BABYLON.Scene object
         const box = BABYLON.MeshBuilder.CreateBox("box", { size: 2 }, scene);
+        box.isPickable = false;
 
         // 1. Create a TransformNode as a pivot
         const pivotNode = new BABYLON.TransformNode("pivot", scene);
@@ -75,7 +78,8 @@ export class HandMotions {
         line.color = new BABYLON.Color3(0, 0, 0);
         line.enableEdgesRendering();
         line.edgesWidth = 100;
-        line.edgesColor = new BABYLON.Color4(0, 0, 0, 1);;
+        line.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
+        line.isPickable = false;
 
         // 4. Update the line in the render loop if objects are moving
         scene.onBeforeRenderObservable.add(() => {
