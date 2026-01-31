@@ -159,7 +159,7 @@ export function hideTitleScreen(light) { // Remove victim parameter
 
 // Helper function to modify victim health from anywhere
 export function modifyVictimHealth(amount) {
-    if (HUD.victim) {
-        HUD.victim.modifyHealth(amount);
+    if (HUD.victimManager) {
+        HUD.victimManager.healActiveVictim(amount)
     }
 }

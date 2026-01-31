@@ -40,7 +40,7 @@ export class ToolQueue {
             console.log(`Correct tool! +100 points. Score: ${this.score}`);
             
             // Vicitim Healthbar modify +
-            modifyVictimHealth(15);
+            modifyVictimHealth(50);
 
             const nextTool = this.getNextRequired();
             if (nextTool) {
@@ -60,7 +60,7 @@ export class ToolQueue {
         window.toolScore = this.score; // Update global for HUD
         
         // Vicitim Healthbar modify +
-        modifyVictimHealth(-20);
+        modifyVictimHealth(-50);
         
         console.log(`%cWrong tool! -50 points. Needed: ${required}, got: ${toolName}`, "color: red; font-size: 16px; font-weight: bold;");
         if (this.onScoreChange) this.onScoreChange(this.score);
