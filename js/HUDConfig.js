@@ -3,7 +3,7 @@ let playerScore = {},
 scoreLabel = {},
 title = {},
 subtitle = {};
-let currentRound = 0; 
+let currentRound = 0;
 const buttonList = {
     startGameButton,
 };
@@ -23,9 +23,10 @@ const HUD = {
 export async function setUpHUD(BABYLON, scene, light, engine, typingTest, victimManagerRef){ // Add victimRef parameter
     let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI", true, scene, BABYLON.Texture.NEAREST_NEAREST);
     let loadedGUI = await advancedTexture.parseFromURLAsync("./json/guiTexture.json");
-    
+
     setUpButtons(advancedTexture, buttonList, light, victimManagerRef);
-    
+    createMuteButton(advancedTexture);
+
     HUD.playerScore = advancedTexture.getControlByName("PlayerScore");
     HUD.playerScore.paddingLeft = "30px"
     HUD.scoreLabel = advancedTexture.getControlByName("ScoreLabel");
@@ -35,7 +36,7 @@ export async function setUpHUD(BABYLON, scene, light, engine, typingTest, victim
     HUD.challenge.paddingLeft = "30px"
     HUD.typingTest = typingTest;
     HUD.victimManager = victimManagerRef;
-    
+
     setupTimer(scene, engine, HUD.challenge);
     setupScore(scene, HUD.typingTest, HUD.playerScore, 0);
     setupVictimHealing(scene, HUD.typingTest, HUD.victimManager);
@@ -48,6 +49,44 @@ function setUpButtons(advancedTexture, buttonList, light, victim) {
         hideTitleScreen(light, victim);
         console.log("%cStart Game Pressed", "color:green");
     });
+    // Show cursor on hover
+    buttonList.startGameButton.onPointerEnterObservable.add(() => {
+        document.body.style.cursor = "pointer";
+    });
+    buttonList.startGameButton.onPointerOutObservable.add(() => {
+        document.body.style.cursor = "none";
+    });
+}
+
+function createMuteButton(advancedTexture) {
+    const muteButton = BABYLON.GUI.Button.CreateSimpleButton("muteBtn", "Mute");
+    muteButton.width = "80px";
+    muteButton.height = "30px";
+    muteButton.color = "white";
+    muteButton.cornerRadius = 5;
+    muteButton.background = "green";
+    muteButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    muteButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    muteButton.left = "350px";
+    muteButton.top = "-10px";
+
+    muteButton.onPointerUpObservable.add(function() {
+        if (window.audioManager) {
+            const isMuted = window.audioManager.toggleMute();
+            muteButton.children[0].text = isMuted ? "Unmute" : "Mute";
+            muteButton.background = isMuted ? "red" : "green";
+        }
+    });
+
+    // Show cursor on hover
+    muteButton.onPointerEnterObservable.add(() => {
+        document.body.style.cursor = "pointer";
+    });
+    muteButton.onPointerOutObservable.add(() => {
+        document.body.style.cursor = "none";
+    });
+
+    advancedTexture.addControl(muteButton);
 }
 
 function setupScore(scene, typingTest, target){
@@ -57,7 +96,7 @@ function setupScore(scene, typingTest, target){
             const typingScore = (stats.correctWords - stats.incorrectCharacters) * (1 + stats.wordsPerMinute);
             const toolScore = window.toolScore || 0;
             target.text = Math.floor(typingScore + toolScore);
-            
+
         }
     });
 }
@@ -68,13 +107,13 @@ function setupVictimHealing(scene, typingTest, victimManager) {
     let lastIncorrectCharacters = 0; // Track incorrect characters
     const healAmount = 50; // HP restored per correct word
     const damageAmount = 5; // HP lost per incorrect character
-    
+
     scene.onBeforeRenderObservable.add(() => {
         if(window.gameStarted && victimManager) {
             const stats = typingTest.getStats();
             const currentCorrectWords = stats.correctWords;
             const currentIncorrectCharacters = stats.incorrectCharacters;
-            
+
             // Check if a new word was typed correctly
             if (currentCorrectWords > lastCorrectWords) {
                 const newWords = currentCorrectWords - lastCorrectWords;
@@ -82,7 +121,7 @@ function setupVictimHealing(scene, typingTest, victimManager) {
                 console.log(`Healed ${healAmount * newWords} HP for ${newWords} correct word(s)`);
                 lastCorrectWords = currentCorrectWords;
             }
-            
+
             // Check if incorrect characters increased
             if (currentIncorrectCharacters > lastIncorrectCharacters) {
                 const newErrors = currentIncorrectCharacters - lastIncorrectCharacters;
@@ -98,11 +137,11 @@ function setupTimer(scene, engine, target){
     let timeElapsed = 0;
     const targetTime = 300;
     let gameEnded = false;
-    
+
     scene.onBeforeRenderObservable.add(() => {
         if(window.gameStarted && !gameEnded){
             timeElapsed += engine.getDeltaTime() / 1000;
-            
+
             // Check if too many victims
             if (HUD.victimManager && HUD.victimManager.gameOver) {
                 resetToDefault();
@@ -110,7 +149,7 @@ function setupTimer(scene, engine, target){
                 window.gameStarted = false;
                 target.text = "Too Many Victims!";
                 console.log("%cGame Over - Too Many Victims!", "color: red; font-size: 24px;");
-                
+
             }
             // Check if time is up
             else if (timeElapsed >= targetTime) {
@@ -119,7 +158,7 @@ function setupTimer(scene, engine, target){
                 window.gameStarted = false;
                 target.text = "Time's Up!";
                 console.log("%cGame Over - Time's Up!", "color: red; font-size: 24px;");
-                
+
             } else {
                 target.text = `Time: ${timeElapsed.toFixed(1)}s | Victims: ${HUD.victimManager ? HUD.victimManager.getVictimCount() : 0}/5`;
             }
@@ -132,11 +171,11 @@ export function resetToDefault() {
     HUD.title.isVisible = true;
     HUD.subtitle.isVisible = true;
     buttonList.startGameButton.isVisible = true;
-        
+
     if (HUD.typingTest) {
         HUD.typingTest.reset();
     }
-    
+
     window.toolScore = 0;
 }
 
@@ -150,10 +189,31 @@ export function hideTitleScreen(light) { // Remove victim parameter
     light.width = 30;
     light.intensity = 1.55;
     HUD.typingTest.startTest();
-    
+
+    // Show victim and health bars using HUD.victim
+    if (HUD.victim) {
+        HUD.victim.isVisible = true;
+        HUD.victim.healthBarBg.isVisible = true;
+        HUD.victim.healthBarFg.isVisible = true;
+    }
+
     // Start victim manager
     if (HUD.victimManager) {
         HUD.victimManager.start();
+    }
+
+    // Show game elements
+    if (window.gameElements) {
+        if (window.gameElements.dancer) window.gameElements.dancer.isVisible = true;
+        if (window.gameElements.table) window.gameElements.table.isVisible = true;
+        if (window.gameElements.handMotions) window.gameElements.handMotions.show();
+        if (window.gameElements.toolManager) window.gameElements.toolManager.show();
+    }
+
+    // Show tool bubble
+    if (window.toolBubble) {
+        window.toolBubble.bubbleDisc.isVisible = true;
+        window.toolBubble.toolIndicator.isVisible = true;
     }
 }
 

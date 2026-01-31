@@ -5,6 +5,7 @@ export class AudioManager {
     this.pingFX;
     this.warmPiano;
     this.error;
+    this.isMuted = false;
 
   // Initialize the alphabet keys as an object
   this.keys = {};
@@ -12,12 +13,15 @@ export class AudioManager {
     this.keys[char] = null;
   });
     this.loadSounds();
+
+    // Store globally so mute button can access it
+    window.audioManager = this;
   }
 
   async loadSounds() {
-      const audioEngine = await this.BABYLON.CreateAudioEngineAsync();
+      this.audioEngine = await this.BABYLON.CreateAudioEngineAsync();
       // Wait for the audio engine to unlock
-      await audioEngine.unlockAsync();
+      await this.audioEngine.unlockAsync();
 
     this.pingFX = new this.BABYLON.CreateSoundAsync("Ping", "./audio/ping.mp3", {
       loop: false,
@@ -83,7 +87,22 @@ export class AudioManager {
   }
 
   playKey(key){
-    // console.warn(key);
+    if (this.isMuted) return;
     this[key].then(s => s.play());
+  }
+
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    // Pause/resume theme music
+    if (this.theme) {
+      this.theme.then(s => {
+        if (this.isMuted) {
+          s.pause();
+        } else {
+          s.play();
+        }
+      });
+    }
+    return this.isMuted;
   }
 }
