@@ -145,7 +145,8 @@ constructor() {
             dancer,
             table,
             handMotions,
-            toolManager
+            toolManager,
+            victimManager
         };
 
         return { scene, toolManager, handMotions, toolQueue };

@@ -26,15 +26,71 @@ export class TypingTest {
         // DOM elements
         this.container = null;
         this.wordDisplay = null;
-        
+
+        // Typing zone - hand must be near here to type (top of screen in world coords)
+        this.typingZone = {
+            minZ: -8,  // Upper bound (top of screen)
+            maxZ: -2   // Lower bound
+        };
+
+        // Tool image paths
+        this.toolImages = {
+            garlic: "./assets/tools/garlic.svg",
+            rosaries: "./assets/tools/rosaries.svg",
+            cross: "./assets/tools/cross.svg",
+            holyWater: "./assets/tools/holyWater.svg",
+            scalpel: "./assets/tools/scalpel.svg"
+        };
+
         // Load word bank
         this.loadWordBank(wordBankPath);
-        
+
         // Create UI
         this.createUI();
-        
+
         // Bind keyboard events
         this.bindEvents();
+    }
+
+    // Check if hand is in the typing zone with the correct tool
+    isHandInTypingZone() {
+        if (!window.gameElements || !window.gameElements.handMotions) {
+            return true; // Allow typing if hand system not set up yet
+        }
+
+        const handMotions = window.gameElements.handMotions;
+        const handPos = handMotions.getHandPosition();
+
+        // Check if hand is in the zone
+        const inZone = handPos.z >= this.typingZone.minZ && handPos.z <= this.typingZone.maxZ;
+        if (!inZone) {
+            return false;
+        }
+
+        // Check if holding a tool
+        if (!handMotions.isHoldingTool()) {
+            return false;
+        }
+
+        // Check if holding the correct tool for the current victim
+        const heldTool = handMotions.getHeldTool();
+        if (!heldTool || !heldTool.metadata) {
+            return false;
+        }
+
+        const heldToolType = heldTool.metadata.toolType;
+        const victimManager = window.gameElements.victimManager;
+
+        if (!victimManager) {
+            return true; // Allow if no victim manager
+        }
+
+        const requiredTool = victimManager.getActiveVictimTool();
+        if (!requiredTool) {
+            return true; // Allow if no required tool
+        }
+
+        return heldToolType === requiredTool;
     }
     
     async loadWordBank(path) {
@@ -78,11 +134,42 @@ export class TypingTest {
         this.wordDisplay.style.cssText = `
             font-size: 48px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             letter-spacing: 5px;
             min-height: 60px;
         `;
-        
+
+        // Create tool indicator below word
+        this.toolIndicator = document.createElement('div');
+        this.toolIndicator.id = 'tool-indicator';
+        this.toolIndicator.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        `;
+
+        this.toolImage = document.createElement('img');
+        this.toolImage.style.cssText = `
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        `;
+        this.toolImage.src = '';
+
+        this.toolIndicator.appendChild(this.toolImage);
+
+        // Store update function globally
+        window.updateToolBubble = (toolName) => {
+            if (toolName && this.toolImages[toolName]) {
+                this.toolImage.src = this.toolImages[toolName];
+                this.toolIndicator.style.display = 'flex';
+            } else {
+                this.toolIndicator.style.display = 'none';
+            }
+        };
+
         // Create stats display
         this.statsDisplay = document.createElement('div');
         this.statsDisplay.id = 'stats-display';
@@ -94,14 +181,6 @@ export class TypingTest {
             justify-content: space-around;
         `;
         
-        // Create instruction text
-        const instructions = document.createElement('div');
-        instructions.style.cssText = `
-            font-size: 12px;
-            color: #999;
-            margin-top: 10px;
-        `;
-        instructions.textContent = 'Start typing to begin the test';
         
         // Create buttons container
         this.buttonsContainer = document.createElement('div');
@@ -158,10 +237,10 @@ export class TypingTest {
         
        // this.buttonsContainer.appendChild(this.stopButton);
        // this.buttonsContainer.appendChild(this.restartButton);
-        
+
         this.container.appendChild(this.wordDisplay);
+        this.container.appendChild(this.toolIndicator);
         this.container.appendChild(this.statsDisplay);
-        this.container.appendChild(instructions);
         this.container.appendChild(this.buttonsContainer);
         document.body.appendChild(this.container);
     }
@@ -206,7 +285,13 @@ export class TypingTest {
     
     handleCharacter(rawChar) {
         if (!this.currentWord) return;
-        
+
+        // Check if hand is in typing zone
+        if (!this.isHandInTypingZone()) {
+            console.log("Hand not in typing zone!");
+            return;
+        }
+
         // Add this check to prevent typing beyond the word length
         if (this.currentIndex >= this.currentWord.length) return;
         
@@ -251,6 +336,11 @@ export class TypingTest {
     }
     
     handleBackspace() {
+        // Check if hand is in typing zone
+        if (!this.isHandInTypingZone()) {
+            return;
+        }
+
         if (this.currentIndex > 0) {
             this.currentIndex--;
             this.userInput = this.userInput.slice(0, -1);

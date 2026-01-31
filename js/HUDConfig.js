@@ -110,15 +110,6 @@ function setupVictimHealing(scene, typingTest, victimManager) {
 
     scene.onBeforeRenderObservable.add(() => {
         if(window.gameStarted && victimManager) {
-            // Only allow healing if the correct tool has been used on the victim
-            if (!victimManager.isActiveVictimReady()) {
-                // Update tracking but don't heal
-                const stats = typingTest.getStats();
-                lastCorrectWords = stats.correctWords;
-                lastIncorrectCharacters = stats.incorrectCharacters;
-                return;
-            }
-
             const stats = typingTest.getStats();
             const currentCorrectWords = stats.correctWords;
             const currentIncorrectCharacters = stats.incorrectCharacters;
@@ -217,12 +208,6 @@ export function hideTitleScreen(light) { // Remove victim parameter
         if (window.gameElements.table) window.gameElements.table.isVisible = true;
         if (window.gameElements.handMotions) window.gameElements.handMotions.show();
         if (window.gameElements.toolManager) window.gameElements.toolManager.show();
-    }
-
-    // Show tool bubble
-    if (window.toolBubble) {
-        window.toolBubble.bubbleDisc.isVisible = true;
-        window.toolBubble.toolIndicator.isVisible = true;
     }
 }
 
