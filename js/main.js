@@ -63,6 +63,13 @@ constructor() {
                         //toolManager.clearAllTools();
                         break;
                     case '`':
+                    case '~':
+                        this.#toggleDebugger(scene);
+                        break;
+                }
+                switch (kbInfo.event.key) {
+                    case '`':
+                    case '~':
                         this.#toggleDebugger(scene);
                         break;
                 }

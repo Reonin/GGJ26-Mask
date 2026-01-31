@@ -38,7 +38,7 @@ export async function setUpHUD(BABYLON, scene, light, engine, typingTest, victim
     HUD.victimManager = victimManagerRef;
 
     setupTimer(scene, engine, HUD.challenge);
-    setupScore(scene, HUD.typingTest, HUD.playerScore, 0);
+    setupScore(scene, engine, HUD.playerScore, 0);
     setupVictimHealing(scene, HUD.typingTest, HUD.victimManager);
     return HUD;
 }
@@ -89,16 +89,32 @@ function createMuteButton(advancedTexture) {
     advancedTexture.addControl(muteButton);
 }
 
-function setupScore(scene, typingTest, target){
-     scene.onBeforeRenderObservable.add(() => {
-        if(window.gameStarted){
-            const stats = typingTest.getStats();
-            const typingScore = (stats.correctWords - stats.incorrectCharacters) * (1 + stats.wordsPerMinute);
-            const toolScore = window.toolScore || 0;
-            target.text = Math.floor(typingScore + toolScore);
+function setupScore(scene, engine, target){
 
+    let timeElapsed = 0;
+    const targetTime = 5;
+    let gameEnded = false;
+
+    scene.onBeforeRenderObservable.add(() => {
+        if(window.gameStarted && !gameEnded){
+        timeElapsed += engine.getDeltaTime() / 1000;
+
+            if(timeElapsed >=  targetTime){
+                //score++ come back and check victim multiplier
+                const score = window.toolScore += (1 * HUD.victimManager.getVictimCount()) ;
+                target.text = score;
+                //reset timeelapsed
+                timeElapsed = 0;
+            }
+// const stats = typingTest.getStats();
+// const typingScore = (stats.correctWords - stats.incorrectCharacters) * (1 + stats.wordsPerMinute);
+// const toolScore = window.toolScore || 0;
+// target.text = Math.floor(typingScore + toolScore);        
+            
         }
     });
+
+
 }
 
 
@@ -160,7 +176,7 @@ function setupTimer(scene, engine, target){
                 console.log("%cGame Over - Time's Up!", "color: red; font-size: 24px;");
 
             } else {
-                target.text = `Time: ${timeElapsed.toFixed(1)}s | Victims: ${HUD.victimManager ? HUD.victimManager.getVictimCount() : 0}/5`;
+                target.text = `Patients: ${HUD.victimManager ? HUD.victimManager.getVictimCount() : 0}/3`;
             }
         }
     });
