@@ -123,10 +123,6 @@ export class VictimManager {
         if (toolName === victim.requiredTool) {
             victim.toolUsed = true;
             console.log(`%cCorrect tool! ${toolName} used on victim. Typing enabled!`, "color: lime; font-size: 16px;");
-            // Update the bubble to show checkmark or hide
-            if (window.updateToolBubble) {
-                window.updateToolBubble(null); // Hide bubble when tool is used
-            }
             return true;
         } else {
             console.log(`%cWrong tool! Needed: ${victim.requiredTool}, got: ${toolName}`, "color: red; font-size: 16px;");
