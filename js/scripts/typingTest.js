@@ -144,6 +144,7 @@ export class TypingTest {
             min-width: 400px;
             text-align: center;
             border: 3px solid #666;
+            pointer-events: none;
         `;
 
         this.wordDisplay = document.createElement('div');
