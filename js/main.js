@@ -135,16 +135,18 @@ constructor() {
         console.log("Tool queue:", toolQueue.getQueue());
         console.log("Next required tool:", toolQueue.getNextRequired());
 
-        // Connect hand to tool manager and queue for pickup
+        // Connect hand to tool manager, queue, and victim manager
         handMotions.setToolManager(toolManager);
         handMotions.setToolQueue(toolQueue);
+        handMotions.setVictimManager(victimManager);
 
         // Store references globally so hideTitleScreen can show them
         window.gameElements = {
             dancer,
             table,
             handMotions,
-            toolManager
+            toolManager,
+            victimManager
         };
 
         return { scene, toolManager, handMotions, toolQueue };

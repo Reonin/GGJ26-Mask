@@ -1,4 +1,5 @@
 import {resetToDefault} from './HUDConfig.js';
+import { TOOL_NAMES } from './tools.js';
 
 // VictimManager.js
 export class VictimManager {
@@ -99,6 +100,42 @@ export class VictimManager {
         }
     }
 
+    // Get a random tool name
+    getRandomTool() {
+        return TOOL_NAMES[Math.floor(Math.random() * TOOL_NAMES.length)];
+    }
+
+    // Get the required tool for the active victim
+    getActiveVictimTool() {
+        const victim = this.getActiveVictim();
+        return victim ? victim.requiredTool : null;
+    }
+
+    // Check if active victim's tool has been used
+    isActiveVictimReady() {
+        const victim = this.getActiveVictim();
+        return victim ? victim.toolUsed : false;
+    }
+
+    // Use a tool on the active victim
+    useToolOnVictim(toolName) {
+        const victim = this.getActiveVictim();
+        if (!victim) return false;
+
+        if (toolName === victim.requiredTool) {
+            victim.toolUsed = true;
+            console.log(`%cCorrect tool! ${toolName} used on victim. Typing enabled!`, "color: lime; font-size: 16px;");
+            // Update the bubble to show checkmark or hide
+            if (window.updateToolBubble) {
+                window.updateToolBubble(null); // Hide bubble when tool is used
+            }
+            return true;
+        } else {
+            console.log(`%cWrong tool! Needed: ${victim.requiredTool}, got: ${toolName}`, "color: red; font-size: 16px;");
+            return false;
+        }
+    }
+
     start() {
         console.log("%cVictimManager started!", "color: lime; font-size: 16px;");
         this.lastSpawnTime = Date.now();
@@ -154,22 +191,32 @@ export class VictimManager {
         victim.currentHealth = 0;
         victim.positionIndex = positionIndex;
         victim.isVisible = true;
-        
+
+        // Assign a random required tool to this victim
+        victim.requiredTool = this.getRandomTool();
+        victim.toolUsed = false;
+        console.log(`%cVictim needs tool: ${victim.requiredTool}`, "color: cyan; font-size: 14px;");
+
         victim.position.x = this.patientPositions[positionIndex].hori;
         victim.position.z = this.patientPositions[positionIndex].vert;
-        
+
         this.occupiedPositions.add(positionIndex);
         this.availablePositions.delete(positionIndex);
-        
+
         this.victims.push(victim);
-        
-        console.log(`%cVictim spawned at position ${positionIndex} (x=${victim.position.x}, z=${victim.position.z})`, 
+
+        console.log(`%cVictim spawned at position ${positionIndex} (x=${victim.position.x}, z=${victim.position.z})`,
             "color: orange; font-size: 14px;");
         console.log(`%cOccupied: [${Array.from(this.occupiedPositions)}], Available: [${Array.from(this.availablePositions)}]`,
             "color: cyan; font-size: 12px;");
-        
-        this.updateHealthBar(); // Update health bar when new victim spawns
-        
+
+        this.updateHealthBar();
+
+        // Update tool indicator for first/active victim
+        if (this.victims.length === 1 && window.updateToolBubble) {
+            window.updateToolBubble(victim.requiredTool);
+        }
+
         return victim;
     }
 
@@ -190,25 +237,31 @@ export class VictimManager {
         const victim = this.victims[index];
         if (victim) {
             const positionIndex = victim.positionIndex;
-            
-            console.log(`%cVictim at position ${positionIndex} healed and removed!`, 
+
+            console.log(`%cVictim at position ${positionIndex} healed and removed!`,
                 "color: lime; font-size: 16px; font-weight: bold;");
-            
+
             victim.isVisible = false;
-            
+
             this.occupiedPositions.delete(positionIndex);
             this.availablePositions.add(positionIndex);
-            
+
             this.victims.splice(index, 1);
-            
+
             console.log(`%cPosition ${positionIndex} freed. Available: [${Array.from(this.availablePositions)}]`,
                 "color: lime; font-size: 12px;");
-            
+
             if (this.activeVictimIndex >= this.victims.length) {
                 this.activeVictimIndex = 0;
             }
-            
-            this.updateHealthBar(); // Update when victim removed
+
+            this.updateHealthBar();
+
+            // Update tool indicator to show next victim's required tool
+            const nextVictim = this.getActiveVictim();
+            if (nextVictim && window.updateToolBubble) {
+                window.updateToolBubble(nextVictim.requiredTool);
+            }
         }
     }
 

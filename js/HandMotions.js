@@ -20,6 +20,7 @@ export class HandMotions {
         this.heldTool = null;
         this.toolManager = null;
         this.toolQueue = null;
+        this.victimManager = null;
 
         // Victim drop zone (matches victim position from victim.js)
         this.victimZone = {
@@ -35,6 +36,7 @@ export class HandMotions {
 
         this.followingMesh = BABYLON.MeshBuilder.CreateSphere("followingMesh", {diameter: 0.4 } , scene);
         this.followingMesh.material = gloveMaterial;
+        this.followingMesh.isVisible = false; // Hide debug sphere
         const followingMesh = this.followingMesh;
 
         // Create the sprite
@@ -52,15 +54,10 @@ export class HandMotions {
         console.log("Sprite manager:", spriteManager);
 
         scene.onPointerMove = function (evt) {
-            const pickResult = scene.pick(evt.clientX, evt.clientY);
-
-            if(followingSprite.position.x > 2){
-                 console.log("%c Left", "color: orange; font-size: 20px; font-weight: bold;");
-            }else if(followingSprite.position.x < -2) {
-                 console.log("%c Right", "color: green; font-size: 20px; font-weight: bold;");
-            }else {
-                console.log("%c Center", "color: white; font-size: 20px; font-weight: bold;");
-            }
+            // Only pick the ground mesh to avoid collision with UI elements
+            const pickResult = scene.pick(evt.clientX, evt.clientY, (mesh) => {
+                return mesh.name === "ground";
+            });
 
             if (pickResult.hit) {
                 followingSprite.position.x = pickResult.pickedPoint.x;
@@ -69,19 +66,27 @@ export class HandMotions {
             }
         };
 
-        // Click to start grab animation and pickup/drop tools
+        // Hold to grab - mousedown picks up tool
         scene.onPointerDown = (evt) => {
-            if (evt.button === 0 && !isGrabbing) { // Left click
+            if (evt.button === 0) { // Left click
                 isGrabbing = true;
                 currentFrame = 0;
                 animationTimer = 0;
                 console.log("Grab animation started");
 
-                // Pickup or drop tool
+                // Try to pick up a tool
+                if (!this.isHoldingTool()) {
+                    this.tryPickupTool();
+                }
+            }
+        };
+
+        // Release to drop - mouseup drops tool
+        scene.onPointerUp = (evt) => {
+            if (evt.button === 0) { // Left click release
+                // Drop tool if holding one
                 if (this.isHoldingTool()) {
                     this.dropTool();
-                } else {
-                    this.tryPickupTool();
                 }
             }
         };
@@ -154,6 +159,10 @@ export class HandMotions {
         this.toolQueue = toolQueue;
     }
 
+    setVictimManager(victimManager) {
+        this.victimManager = victimManager;
+    }
+
     isOverVictim() {
         const handPos = this.followingSprite.position;
         const dx = handPos.x - this.victimZone.x;
@@ -206,9 +215,9 @@ export class HandMotions {
         const droppedTool = this.heldTool;
         const toolType = droppedTool.metadata.toolType;
 
-        // Check if dropping on victim - use the tool
-        if (this.isOverVictim() && this.toolQueue) {
-            this.toolQueue.useTool(toolType);
+        // Check if dropping on victim - use the tool on the victim
+        if (this.isOverVictim() && this.victimManager) {
+            this.victimManager.useToolOnVictim(toolType);
         }
 
         // Return tool to original position in toolbelt

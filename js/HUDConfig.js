@@ -208,12 +208,6 @@ export function hideTitleScreen(light) { // Remove victim parameter
         if (window.gameElements.handMotions) window.gameElements.handMotions.show();
         if (window.gameElements.toolManager) window.gameElements.toolManager.show();
     }
-
-    // Show tool bubble
-    if (window.toolBubble) {
-        window.toolBubble.bubbleDisc.isVisible = true;
-        window.toolBubble.toolIndicator.isVisible = true;
-    }
 }
 
 // Helper function to modify victim health from anywhere
