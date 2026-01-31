@@ -77,18 +77,13 @@ export class TypingTest {
         }
 
         const heldToolType = heldTool.metadata.toolType;
-        const victimManager = window.gameElements.victimManager;
 
-        if (!victimManager) {
+        // Check if holding the correct tool for the current word
+        if (!this.currentTool) {
             return true;
         }
 
-        const requiredTool = victimManager.getActiveVictimTool();
-        if (!requiredTool) {
-            return true;
-        }
-
-        return heldToolType === requiredTool;
+        return heldToolType === this.currentTool;
     }
     
     async loadWordBank(path) {
@@ -294,18 +289,26 @@ export class TypingTest {
     
     nextWord() {
         if (this.wordBank.length === 0) return;
-        
+
         // Reset position to top
         this.resetPosition();
-        
+
         const randomIndex = Math.floor(Math.random() * this.wordBank.length);
         this.currentWord = this.wordBank[randomIndex].challenge;
         this.currentIndex = 0;
         this.userInput = '';
         this.stats.totalWords++;
-        
+
+        // Pick a random tool for this word
+        const toolNames = Object.keys(this.toolImages);
+        const randomTool = toolNames[Math.floor(Math.random() * toolNames.length)];
+        this.currentTool = randomTool;
+        if (window.updateToolBubble) {
+            window.updateToolBubble(randomTool);
+        }
+
         this.renderWord();
-        
+
         // Start falling animation after brief delay
         setTimeout(() => {
             this.startFalling();
