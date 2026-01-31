@@ -1,4 +1,5 @@
 import { TOOL_NAMES } from './tools.js';
+import { modifyVictimHealth } from './HUDConfig.js';
 
 export class ToolQueue {
     constructor() {
@@ -37,6 +38,10 @@ export class ToolQueue {
             this.score += 100;
             window.toolScore = this.score; // Update global for HUD
             console.log(`Correct tool! +100 points. Score: ${this.score}`);
+            
+            // Vicitim Healthbar modify +
+            modifyVictimHealth(15);
+
             const nextTool = this.getNextRequired();
             if (nextTool) {
                 console.log(`%cNext required tool: ${nextTool}`, "color: cyan; font-size: 16px; font-weight: bold;");
@@ -53,6 +58,10 @@ export class ToolQueue {
         }
         this.score -= 50;
         window.toolScore = this.score; // Update global for HUD
+        
+        // Vicitim Healthbar modify +
+        modifyVictimHealth(-20);
+        
         console.log(`%cWrong tool! -50 points. Needed: ${required}, got: ${toolName}`, "color: red; font-size: 16px; font-weight: bold;");
         if (this.onScoreChange) this.onScoreChange(this.score);
         return false;

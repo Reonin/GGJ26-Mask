@@ -8,6 +8,7 @@ import {setUpHUD, hideTitleScreen} from './HUDConfig.js';
 import { createToolManager } from './tools.js';
 import { TypingTest } from './scripts/typingTest.js';
 import { ToolQueue } from './ToolQueue.js';
+import { VictimManager } from './VictimManager.js';
 
 export class Main {
 constructor() {
@@ -108,10 +109,11 @@ constructor() {
 
         const table = createTable(scene);
         const victim = createVictim(scene);
+        const victimManager = new VictimManager(scene, createVictim);
 
         
         //GUI
-        const HUD = setUpHUD(BABYLON, scene, this.light, this.engine, this.typingTest, victim);
+        const HUD = await setUpHUD(BABYLON, scene, this.light, this.engine, this.typingTest, victimManager);
 
 
         const handMotions = new HandMotions(BABYLON, scene);
