@@ -36,9 +36,11 @@ export async function setUpHUD(BABYLON, scene, light, engine, typingTest, victim
     HUD.typingTest = typingTest;
     HUD.victim = victimRef; // Store victim reference
     
+    // HUD.title.fontFamily  = '"Jacquard 12", system-ui';
     setupTimer(scene, engine, HUD.challenge);
     setupScore(scene, HUD.typingTest, HUD.playerScore, 0);
-    setupVictimHealing(scene, HUD.typingTest, HUD.victim)
+    setupVictimHealing(scene, HUD.typingTest, HUD.victim);
+    loadedGUI.markAsDirty();
     return HUD;
 }
 
