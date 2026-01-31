@@ -13,7 +13,7 @@ export function createPlagueDoctor(scene) {
     plagueDoctor.rotation.x = Math.PI / 2;
 
     // Position in lower center of view (positive Z is toward bottom of screen)
-    plagueDoctor.position = new BABYLON.Vector3(0, 0.01, 4);
+    plagueDoctor.position = new BABYLON.Vector3(0, 0.01, 5);
 
     // Placeholder material - dark color to represent plague doctor silhouette
     const plagueDoctorMat = new BABYLON.StandardMaterial("plagueDoctorMat", scene);

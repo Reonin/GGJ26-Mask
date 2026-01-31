@@ -184,6 +184,16 @@ export function createToolManager(scene) {
 
         getToolCount() {
             return tools.length;
+        },
+
+        hide() {
+            tools.forEach(tool => tool.isVisible = false);
+            if (toolbeltMesh) toolbeltMesh.isVisible = false;
+        },
+
+        show() {
+            tools.forEach(tool => tool.isVisible = true);
+            if (toolbeltMesh) toolbeltMesh.isVisible = true;
         }
     };
 

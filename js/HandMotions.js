@@ -228,4 +228,12 @@ export class HandMotions {
     isHoldingTool() {
         return this.heldTool !== null;
     }
+
+    hide() {
+        this.followingSprite.isVisible = false;
+    }
+
+    show() {
+        this.followingSprite.isVisible = true;
+    }
 }
