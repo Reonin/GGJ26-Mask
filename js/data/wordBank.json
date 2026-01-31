@@ -1,41 +1,41 @@
 {
     "1": {
-        "challenge": "Caput",
+        "challenge": "caput",
         "handPlacement": "right",
         "difficulty": "easy"
     },
     "2": {
-        "challenge": "Digitus",
+        "challenge": "digitus",
         "handPlacement": "left",
         "difficulty": "easy"
     },
     "3": {
-        "challenge": "Manus",
+        "challenge": "manus",
         "handPlacement": "right",
         "difficulty": "easy"
     },
     "4": {
-        "challenge": "Pulmo",
+        "challenge": "pulmo",
         "handPlacement": "both",
         "difficulty": "medium"
     },
     "5": {
-        "challenge": "Abdomen",
+        "challenge": "abdomen",
         "handPlacement": "both",
         "difficulty": "medium"
     },
     "6": {
-        "challenge": "Corpus",
+        "challenge": "corpus",
         "handPlacement": "both",
         "difficulty": "medium"
     },
     "7": {
-        "challenge": "Genu",
+        "challenge": "genu",
         "handPlacement": "both",
         "difficulty": "hard"
     },
     "8": {
-        "challenge": "Vena",
+        "challenge": "vena",
         "handPlacement": "both",
         "difficulty": "hard"
     }

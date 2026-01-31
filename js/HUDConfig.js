@@ -7,13 +7,15 @@ let currentRound = 0;
 const buttonList = {
     startGameButton,
 };
+let typingTest;
 
 const HUD = {
     playerScore,
     scoreLabel,
     title,
     subtitle,
-    currentRound
+    currentRound,
+    typingTest
 }
 
 export async function setUpHUD(BABYLON, scene, light, engine, typingTest){
@@ -27,9 +29,10 @@ export async function setUpHUD(BABYLON, scene, light, engine, typingTest){
     HUD.title = advancedTexture.getControlByName("Title");
     HUD.subtitle = advancedTexture.getControlByName("Subtitle");
     HUD.challenge = advancedTexture.getControlByName("challenge");
-   
+    HUD.typingTest = typingTest;
+
     setupTimer(scene, engine, HUD.challenge);
-    setupScore(scene, typingTest, HUD.playerScore);
+    setupScore(scene, HUD.typingTest, HUD.playerScore);
     return HUD;
 }
 
@@ -43,8 +46,11 @@ function setUpButtons(advancedTexture, buttonList, light) {
 function setupScore(scene, typingTest, target){
      scene.onBeforeRenderObservable.add(() => {
         if(window.gameStarted){
+            //let points = ((Correct Characters typed - incorrect chars)) *1. WPM 
+
             const stats = typingTest.getStats();
-            target.text = stats.correctWords;
+            // target.text = stats.correctWords;
+            target.text = (stats.correctWords - stats.incorrectCharacters) * (1 + stats.wordsPerMinute);
         }
     });
 }
@@ -79,4 +85,5 @@ export function hideTitleScreen(light) {
         buttonList.startGameButton.isVisible = false;
         light.width = 30;
         light.intensity = 1.55;
+        HUD.typingTest.startTest();
 }

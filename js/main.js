@@ -31,10 +31,12 @@ constructor() {
         scene.onKeyboardObservable.add((kbInfo) => {
             if (kbInfo.type == BABYLON.KeyboardEventTypes.KEYDOWN) {
                 console.log("KEY DOWN: ", kbInfo.event.key);
+                let alphabetical;
                 if (/^[a-zA-Z]$/.test(kbInfo.event.key)) {
                     this.audioManager.playKey(kbInfo.event.key.toLowerCase());
+                    alphabetical = kbInfo.event.key;
                 }
-                switch (kbInfo.event.key) {
+                switch (alphabetical) {
                     case 'A':
                     case 'a':
                         break;

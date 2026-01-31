@@ -156,8 +156,8 @@ export class TypingTest {
         };
         this.restartButton.onclick = () => this.restartTest();
         
-        this.buttonsContainer.appendChild(this.stopButton);
-        this.buttonsContainer.appendChild(this.restartButton);
+       // this.buttonsContainer.appendChild(this.stopButton);
+       // this.buttonsContainer.appendChild(this.restartButton);
         
         this.container.appendChild(this.wordDisplay);
         this.container.appendChild(this.statsDisplay);
@@ -172,9 +172,9 @@ export class TypingTest {
             if (e.ctrlKey || e.altKey || e.metaKey) return;
             
             // Start test on first key press
-            if (!this.stats.startTime) {
-                this.startTest();
-            }
+            // if (!this.stats.startTime) {
+            //     this.startTest();
+            // }
             
             if (e.key === 'Backspace') {
                 e.preventDefault();
@@ -204,11 +204,12 @@ export class TypingTest {
         this.renderWord();
     }
     
-    handleCharacter(char) {
+    handleCharacter(rawChar) {
         if (!this.currentWord) return;
         
+        let char = rawChar;
         const expectedChar = this.currentWord[this.currentIndex];
-        const isCorrect = char === expectedChar;
+        const isCorrect = char.toLowerCase() === expectedChar.toLowerCase();
         
         this.userInput += char;
         this.stats.totalCharacters++;
@@ -271,7 +272,7 @@ export class TypingTest {
             
             // Color based on input
             if (i < this.userInput.length) {
-                if (this.userInput[i] === this.currentWord[i]) {
+                if (this.userInput[i].toLowerCase() === this.currentWord[i].toLowerCase()) {
                     span.style.color = '#22c55e'; // Green
                 } else {
                     span.style.color = '#ef4444'; // Red
