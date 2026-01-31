@@ -1,13 +1,15 @@
 let startGameButton;
 let playerScore = {},
-scoreLabel = {},
-title = {},
-subtitle = {};
+    scoreLabel = {},
+    title = {},
+    subtitle = {};
+
 let currentRound = 0;
+
 const buttonList = {
     startGameButton,
 };
-let typingTest;
+
 let victimManager;
 
 const HUD = {
@@ -16,43 +18,62 @@ const HUD = {
     title,
     subtitle,
     currentRound,
-    typingTest,
+    typingTests: {},   // now stores 3 instances
     victimManager
-}
+};
 
-export async function setUpHUD(BABYLON, scene, light, engine, typingTest, victimManagerRef){ // Add victimRef parameter
-    let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI", true, scene, BABYLON.Texture.NEAREST_NEAREST);
+export async function setUpHUD(
+    BABYLON,
+    scene,
+    light,
+    engine,
+    typingTests,        // now receives all 3 TypingTests
+    victimManagerRef
+) {
+    let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI(
+        "GUI",
+        true,
+        scene,
+        BABYLON.Texture.NEAREST_NEAREST
+    );
+
     let loadedGUI = await advancedTexture.parseFromURLAsync("./json/guiTexture.json");
 
     setUpButtons(advancedTexture, buttonList, light, victimManagerRef);
     createMuteButton(advancedTexture);
 
     HUD.playerScore = advancedTexture.getControlByName("PlayerScore");
-    HUD.playerScore.paddingLeft = "30px"
+    HUD.playerScore.paddingLeft = "30px";
+
     HUD.scoreLabel = advancedTexture.getControlByName("ScoreLabel");
     HUD.title = advancedTexture.getControlByName("Title");
     HUD.subtitle = advancedTexture.getControlByName("Subtitle");
+
     HUD.challenge = advancedTexture.getControlByName("challenge");
-    HUD.challenge.paddingLeft = "30px"
-    HUD.typingTest = typingTest;
+    HUD.challenge.paddingLeft = "30px";
+
+    HUD.typingTests = typingTests;      // store all 3
     HUD.victimManager = victimManagerRef;
 
     setupTimer(scene, engine, HUD.challenge);
     setupScore(scene, engine, HUD.playerScore, 0);
-    setupVictimHealing(scene, HUD.typingTest, HUD.victimManager);
+    setupVictimHealing(scene, HUD.typingTests, HUD.victimManager);
+
     return HUD;
 }
 
-function setUpButtons(advancedTexture, buttonList, light, victim) {
+function setUpButtons(advancedTexture, buttonList, light, victimManager) {
     buttonList.startGameButton = advancedTexture.getControlByName("Start Game");
+
     buttonList.startGameButton.onPointerUpObservable.add(function () {
-        hideTitleScreen(light, victim);
+        hideTitleScreen(light);
         console.log("%cStart Game Pressed", "color:green");
     });
-    // Show cursor on hover
+
     buttonList.startGameButton.onPointerEnterObservable.add(() => {
         document.body.style.cursor = "pointer";
     });
+
     buttonList.startGameButton.onPointerOutObservable.add(() => {
         document.body.style.cursor = "none";
     });
@@ -70,7 +91,7 @@ function createMuteButton(advancedTexture) {
     muteButton.left = "350px";
     muteButton.top = "-10px";
 
-    muteButton.onPointerUpObservable.add(function() {
+    muteButton.onPointerUpObservable.add(function () {
         if (window.audioManager) {
             const isMuted = window.audioManager.toggleMute();
             muteButton.children[0].text = isMuted ? "Unmute" : "Mute";
@@ -78,10 +99,10 @@ function createMuteButton(advancedTexture) {
         }
     });
 
-    // Show cursor on hover
     muteButton.onPointerEnterObservable.add(() => {
         document.body.style.cursor = "pointer";
     });
+
     muteButton.onPointerOutObservable.add(() => {
         document.body.style.cursor = "none";
     });
@@ -89,93 +110,75 @@ function createMuteButton(advancedTexture) {
     advancedTexture.addControl(muteButton);
 }
 
-function setupScore(scene, engine, target){
-
+function setupScore(scene, engine, target) {
     let timeElapsed = 0;
     const targetTime = 5;
     let gameEnded = false;
 
     scene.onBeforeRenderObservable.add(() => {
-        if(window.gameStarted && !gameEnded){
-        timeElapsed += engine.getDeltaTime() / 1000;
+        if (window.gameStarted && !gameEnded) {
+            timeElapsed += engine.getDeltaTime() / 1000;
 
-            if(timeElapsed >=  targetTime){
-                //score++ come back and check victim multiplier
-                const score = window.toolScore += (1 * HUD.victimManager.getVictimCount()) ;
+            if (timeElapsed >= targetTime) {
+                const score = window.toolScore += (1 * HUD.victimManager.getVictimCount());
                 target.text = score;
-                //reset timeelapsed
                 timeElapsed = 0;
             }
-// const stats = typingTest.getStats();
-// const typingScore = (stats.correctWords - stats.incorrectCharacters) * (1 + stats.wordsPerMinute);
-// const toolScore = window.toolScore || 0;
-// target.text = Math.floor(typingScore + toolScore);        
-            
         }
     });
-
-
 }
 
-
-function setupVictimHealing(scene, typingTest, victimManager) {
-    let lastCorrectWords = 0;
-    let lastIncorrectCharacters = 0; // Track incorrect characters
-    const healAmount = 50; // HP restored per correct word
-    const damageAmount = 5; // HP lost per incorrect character
-
+function setupVictimHealing(scene, typingTests, victimManager) {
     scene.onBeforeRenderObservable.add(() => {
-        if(window.gameStarted && victimManager) {
-            const stats = typingTest.getStats();
-            const currentCorrectWords = stats.correctWords;
-            const currentIncorrectCharacters = stats.incorrectCharacters;
+        if (!window.gameStarted || !victimManager) return;
 
-            // Check if a new word was typed correctly
-            if (currentCorrectWords > lastCorrectWords) {
-                const newWords = currentCorrectWords - lastCorrectWords;
-                victimManager.healActiveVictim(healAmount * newWords);
-                console.log(`Healed ${healAmount * newWords} HP for ${newWords} correct word(s)`);
-                lastCorrectWords = currentCorrectWords;
+        Object.values(typingTests).forEach(test => {
+            const stats = test.getStats();
+
+            if (!test._lastCorrectWords) test._lastCorrectWords = 0;
+            if (!test._lastIncorrectCharacters) test._lastIncorrectCharacters = 0;
+
+            if (stats.correctWords > test._lastCorrectWords) {
+                const newWords = stats.correctWords - test._lastCorrectWords;
+                victimManager.healActiveVictim(50 * newWords);
+                console.log(`Healed ${50 * newWords} HP from TypingTest ${test.instanceId}`);
+                test._lastCorrectWords = stats.correctWords;
             }
 
-            // Check if incorrect characters increased
-            if (currentIncorrectCharacters > lastIncorrectCharacters) {
-                const newErrors = currentIncorrectCharacters - lastIncorrectCharacters;
-                victimManager.healActiveVictim(-damageAmount * newErrors)
-                console.log(`Damaged ${damageAmount * newErrors} HP for ${newErrors} incorrect character(s)`);
-                lastIncorrectCharacters = currentIncorrectCharacters;
+            if (stats.incorrectCharacters > test._lastIncorrectCharacters) {
+                const newErrors = stats.incorrectCharacters - test._lastIncorrectCharacters;
+                victimManager.healActiveVictim(-5 * newErrors);
+                console.log(`Damaged ${5 * newErrors} HP from TypingTest ${test.instanceId}`);
+                test._lastIncorrectCharacters = stats.incorrectCharacters;
             }
-        }
+        });
     });
 }
 
-function setupTimer(scene, engine, target){
+function setupTimer(scene, engine, target) {
     let timeElapsed = 0;
     const targetTime = 300;
     let gameEnded = false;
 
     scene.onBeforeRenderObservable.add(() => {
-        if(window.gameStarted && !gameEnded){
+        if (window.gameStarted && !gameEnded) {
             timeElapsed += engine.getDeltaTime() / 1000;
 
-            // Check if too many victims
             if (HUD.victimManager && HUD.victimManager.gameOver) {
                 resetToDefault();
                 gameEnded = true;
                 window.gameStarted = false;
                 target.text = "Too Many Victims!";
                 console.log("%cGame Over - Too Many Victims!", "color: red; font-size: 24px;");
-
             }
-            // Check if time is up
             else if (timeElapsed >= targetTime) {
                 resetToDefault();
                 gameEnded = true;
                 window.gameStarted = false;
                 target.text = "Time's Up!";
                 console.log("%cGame Over - Time's Up!", "color: red; font-size: 24px;");
-
-            } else {
+            }
+            else {
                 target.text = `Patients: ${HUD.victimManager ? HUD.victimManager.getVictimCount() : 0}/3`;
             }
         }
@@ -187,37 +190,26 @@ export function resetToDefault() {
     HUD.subtitle.isVisible = true;
     buttonList.startGameButton.isVisible = true;
 
-    if (HUD.typingTest) {
-        HUD.typingTest.reset();
-    }
+    Object.values(HUD.typingTests).forEach(test => test.reset());
 
     window.toolScore = 0;
 }
 
-
-
-export function hideTitleScreen(light) { // Remove victim parameter
+export function hideTitleScreen(light) {
     HUD.title.isVisible = false;
     HUD.subtitle.isVisible = false;
     window.gameStarted = true;
     buttonList.startGameButton.isVisible = false;
+
     light.width = 30;
     light.intensity = 1.55;
-    HUD.typingTest.startTest();
 
-    // Show victim and health bars using HUD.victim
-    if (HUD.victim) {
-        HUD.victim.isVisible = true;
-        HUD.victim.healthBarBg.isVisible = true;
-        HUD.victim.healthBarFg.isVisible = true;
-    }
+    Object.values(HUD.typingTests).forEach(test => test.startTest());
 
-    // Start victim manager
     if (HUD.victimManager) {
         HUD.victimManager.start();
     }
 
-    // Show game elements
     if (window.gameElements) {
         if (window.gameElements.dancer) window.gameElements.dancer.isVisible = true;
         if (window.gameElements.table) window.gameElements.table.isVisible = true;
@@ -226,9 +218,8 @@ export function hideTitleScreen(light) { // Remove victim parameter
     }
 }
 
-// Helper function to modify victim health from anywhere
 export function modifyVictimHealth(amount) {
     if (HUD.victimManager) {
-        HUD.victimManager.healActiveVictim(amount)
+        HUD.victimManager.healActiveVictim(amount);
     }
 }
