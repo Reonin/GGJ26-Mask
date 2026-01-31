@@ -136,38 +136,13 @@ export class VictimManager {
         for (let index = 0; index < 3; index++) {
             this.spawnVictim();
         }
-       
-        
+
         this.scene.onBeforeRenderObservable.add(() => {
             if (window.gameStarted && !this.gameOver) {
-                //this.update();
-                this.updateHealthBar(); // Update health bar every frame
+                this.updateHealthBar();
             }
         });
     }
-
-    // update() {
-    //     const currentTime = Date.now();
-        
-    //     // Check if we should spawn a new victim and have available positions
-    //     if (currentTime - this.lastSpawnTime >= this.spawnInterval) {
-    //         if (this.victims.length < this.maxVictims && this.availablePositions.size > 0) {
-    //             this.spawnVictim();
-    //             this.lastSpawnTime = currentTime;
-    //         }
-    //     }
-
-    //     // Check if max victims reached
-    //     if (this.victims.length >= this.maxVictims) {
-    //         this.triggerGameOver();
-    //     }
-
-    //     // Check if active victim is healed
-    //     const activeVictim = this.getActiveVictim();
-    //     if (activeVictim && activeVictim.currentHealth >= activeVictim.maxHealth) {
-    //         this.healVictim(this.activeVictimIndex);
-    //     }
-    // }
 
     getNextAvailablePosition() {
         // Get first available position from the Set
@@ -210,11 +185,6 @@ export class VictimManager {
 
         this.updateHealthBar();
 
-        // Update tool indicator for first/active victim
-        if (this.victims.length === 1 && window.updateToolBubble) {
-            window.updateToolBubble(victim.requiredTool);
-        }
-
         return victim;
     }
 
@@ -254,12 +224,6 @@ export class VictimManager {
             }
 
             this.updateHealthBar();
-
-            // Update tool indicator to show next victim's required tool
-            const nextVictim = this.getActiveVictim();
-            if (nextVictim && window.updateToolBubble) {
-                window.updateToolBubble(nextVictim.requiredTool);
-            }
         }
     }
 

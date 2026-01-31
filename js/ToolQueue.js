@@ -18,10 +18,6 @@ export class ToolQueue {
             this.queue.push(randomTool);
         }
         if (this.onQueueChange) this.onQueueChange(this.queue);
-        // Update speech bubble
-        if (window.updateToolBubble) {
-            window.updateToolBubble(this.getNextRequired());
-        }
         return this.queue;
     }
 
@@ -47,10 +43,6 @@ export class ToolQueue {
                 console.log(`%cNext required tool: ${nextTool}`, "color: cyan; font-size: 16px; font-weight: bold;");
             } else {
                 console.log(`%cQueue complete!`, "color: lime; font-size: 16px; font-weight: bold;");
-            }
-            // Update speech bubble
-            if (window.updateToolBubble) {
-                window.updateToolBubble(nextTool);
             }
             if (this.onScoreChange) this.onScoreChange(this.score);
             if (this.onQueueChange) this.onQueueChange(this.queue);
