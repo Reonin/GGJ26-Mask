@@ -207,6 +207,9 @@ export class TypingTest {
     handleCharacter(rawChar) {
         if (!this.currentWord) return;
         
+        // Add this check to prevent typing beyond the word length
+        if (this.currentIndex >= this.currentWord.length) return;
+        
         let char = rawChar;
         const expectedChar = this.currentWord[this.currentIndex];
         const isCorrect = char.toLowerCase() === expectedChar.toLowerCase();
