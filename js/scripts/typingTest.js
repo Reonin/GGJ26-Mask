@@ -34,9 +34,9 @@ export class TypingTest {
 
 
         // Falling animation
-        this.minFallDuration = 3000;
-        this.maxFallDuration = 20000;
-        this.currentFallDuration = 12000;
+        this.minFallDuration = 10000;
+        this.maxFallDuration = 30000;
+        this.currentFallDuration = 20000;
         this.isFalling = false;
         this.fallAnimationFrame = null;
         this.fallStartTime = null;
@@ -99,12 +99,12 @@ export class TypingTest {
 
         const heldToolType = heldTool.metadata.toolType;
 
-        if (!victimManager) return true;
+        // Check if holding the correct tool for the current word
+        if (!this.currentTool) {
+            return true;
+        }
 
-        const requiredTool = victimManager.getActiveVictimTool();
-        if (!requiredTool) return true;
-
-        return heldToolType === requiredTool;
+        return heldToolType === this.currentTool;
     }
 
     // -------------------------------------------------------------
