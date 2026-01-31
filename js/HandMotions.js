@@ -19,6 +19,14 @@ export class HandMotions {
         this.scene = scene;
         this.heldTool = null;
         this.toolManager = null;
+        this.toolQueue = null;
+
+        // Victim drop zone (matches victim position from victim.js)
+        this.victimZone = {
+            x: 0,
+            z: -4,
+            radius: 2.5 // How close to victim center to count as "on victim"
+        };
 
         const gloveColor = new BABYLON.Color3(1, 1, 1);
         const gloveMaterial = new BABYLON.StandardMaterial("material", scene);
@@ -142,6 +150,18 @@ export class HandMotions {
         this.toolManager = toolManager;
     }
 
+    setToolQueue(toolQueue) {
+        this.toolQueue = toolQueue;
+    }
+
+    isOverVictim() {
+        const handPos = this.followingSprite.position;
+        const dx = handPos.x - this.victimZone.x;
+        const dz = handPos.z - this.victimZone.z;
+        const distance = Math.sqrt(dx * dx + dz * dz);
+        return distance < this.victimZone.radius;
+    }
+
     getHandPosition() {
         return this.followingSprite.position;
     }
@@ -184,6 +204,12 @@ export class HandMotions {
         }
 
         const droppedTool = this.heldTool;
+        const toolType = droppedTool.metadata.toolType;
+
+        // Check if dropping on victim - use the tool
+        if (this.isOverVictim() && this.toolQueue) {
+            this.toolQueue.useTool(toolType);
+        }
 
         // Return tool to original position in toolbelt
         if (droppedTool.metadata.originalPosition) {
@@ -191,7 +217,7 @@ export class HandMotions {
         }
 
         this.heldTool = null;
-        console.log("Dropped: " + droppedTool.metadata.toolType);
+        console.log("Dropped: " + toolType);
         return droppedTool;
     }
 
