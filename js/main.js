@@ -100,9 +100,7 @@ constructor() {
         this.light = new BABYLON.RectAreaLight("light", new BABYLON.Vector3(0, 1, 10), 3, 10, scene);
         this.light.intensity = 0.35;
 
-        //GUI
-        const HUD = setUpHUD(BABYLON, scene, this.light, this.engine, this.typingTest);
-
+       
         const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
 
         // Create the dancing plague doctor
@@ -110,6 +108,11 @@ constructor() {
 
         const table = createTable(scene);
         const victim = createVictim(scene);
+
+        
+        //GUI
+        const HUD = setUpHUD(BABYLON, scene, this.light, this.engine, this.typingTest, victim);
+
 
         const handMotions = new HandMotions(BABYLON, scene);
 
