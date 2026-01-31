@@ -105,22 +105,27 @@ constructor() {
 
         // Create the dancing plague doctor
         const dancer = createDancingSprite(scene);
+        dancer.isVisible = false; // Hide until game starts
 
         const table = createTable(scene);
+        table.isVisible = false; // Hide until game starts
+
         const victim = createVictim(scene);
 
-        
+
         //GUI
         const HUD = setUpHUD(BABYLON, scene, this.light, this.engine, this.typingTest, victim);
 
 
         const handMotions = new HandMotions(BABYLON, scene);
+        handMotions.hide(); // Hide until game starts
 
         this.audioManager = new AudioManager(BABYLON, scene);
 
         // Create tool manager and spawn toolbelt
         const toolManager = createToolManager(scene);
         toolManager.spawnToolbelt();
+        toolManager.hide(); // Hide until game starts
 
         // Create tool queue and fill with random tools
         const toolQueue = new ToolQueue();
@@ -131,6 +136,14 @@ constructor() {
         // Connect hand to tool manager and queue for pickup
         handMotions.setToolManager(toolManager);
         handMotions.setToolQueue(toolQueue);
+
+        // Store references globally so hideTitleScreen can show them
+        window.gameElements = {
+            dancer,
+            table,
+            handMotions,
+            toolManager
+        };
 
         return { scene, toolManager, handMotions, toolQueue };
     };
