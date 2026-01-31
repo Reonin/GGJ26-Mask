@@ -7,9 +7,6 @@ export class TypingTest {
         this.startTime = null;
         this.endTime = null;
         
-                /* Statistics can throw this into state to be available for affects on the screen etc..
-           Will probably need to be accessible throughout the project
-        */ 
         this.stats = {
             totalWords: 0,
             correctWords: 0,
@@ -27,10 +24,10 @@ export class TypingTest {
         this.container = null;
         this.wordDisplay = null;
 
-        // Typing zone - hand must be near here to type (top of screen in world coords)
+        // Typing zone
         this.typingZone = {
-            minZ: -8,  // Upper bound (top of screen)
-            maxZ: -2   // Lower bound
+            minZ: -8,
+            maxZ: -2
         };
 
         // Tool image paths
@@ -42,37 +39,38 @@ export class TypingTest {
             scalpel: "./assets/tools/scalpel.svg"
         };
 
-        // Load word bank
+        // Tetris falling animation properties
+        this.minFallDuration = 3000; // Fastest fall time (3 seconds)
+        this.maxFallDuration = 8000; // Slowest fall time (8 seconds)
+        this.currentFallDuration = 5000;
+        this.isFalling = false;
+        this.fallAnimationFrame = null;
+        this.fallStartTime = null;
+        this.currentTopPosition = -200; // Start position
+        this.targetTopPosition = window.innerHeight; // Bottom of screen
+
         this.loadWordBank(wordBankPath);
-
-        // Create UI
         this.createUI();
-
-        // Bind keyboard events
         this.bindEvents();
     }
 
-    // Check if hand is in the typing zone with the correct tool
     isHandInTypingZone() {
         if (!window.gameElements || !window.gameElements.handMotions) {
-            return true; // Allow typing if hand system not set up yet
+            return true;
         }
 
         const handMotions = window.gameElements.handMotions;
         const handPos = handMotions.getHandPosition();
 
-        // Check if hand is in the zone
         const inZone = handPos.z >= this.typingZone.minZ && handPos.z <= this.typingZone.maxZ;
         if (!inZone) {
             return false;
         }
 
-        // Check if holding a tool
         if (!handMotions.isHoldingTool()) {
             return false;
         }
 
-        // Check if holding the correct tool for the current victim
         const heldTool = handMotions.getHeldTool();
         if (!heldTool || !heldTool.metadata) {
             return false;
@@ -82,12 +80,12 @@ export class TypingTest {
         const victimManager = window.gameElements.victimManager;
 
         if (!victimManager) {
-            return true; // Allow if no victim manager
+            return true;
         }
 
         const requiredTool = victimManager.getActiveVictimTool();
         if (!requiredTool) {
-            return true; // Allow if no required tool
+            return true;
         }
 
         return heldToolType === requiredTool;
@@ -101,7 +99,6 @@ export class TypingTest {
             console.log('Word bank loaded:', this.wordBank.length, 'words');
         } catch (error) {
             console.error('Error loading word bank:', error);
-            // Fallback word bank
             this.wordBank = [
                 { challenge: "hello", handPlacement: "left", difficulty: "easy" },
                 { challenge: "world", handPlacement: "right", difficulty: "easy" },
@@ -111,21 +108,22 @@ export class TypingTest {
     }
     
     createUI() {
-        // Create container
+        // Create container - starts OFF SCREEN at top
         this.container = document.createElement('div');
         this.container.id = 'typing-test-container';
         this.container.style.cssText = `
             position: fixed;
-            top: 20px;
+            top: -200px;
             left: 50%;
             transform: translateX(-50%);
-            background: transparent;
+            background: rgba(0, 0, 0, 0.8);
             padding: 30px 50px;
             border-radius: 15px;
             z-index: 1000;
             font-family: 'Courier New', monospace;
             min-width: 400px;
             text-align: center;
+            border: 3px solid #666;
         `;
         
         // Create word display
@@ -137,9 +135,10 @@ export class TypingTest {
             margin-bottom: 10px;
             letter-spacing: 5px;
             min-height: 60px;
+            color: white;
         `;
 
-        // Create tool indicator below word
+        // Create tool indicator
         this.toolIndicator = document.createElement('div');
         this.toolIndicator.id = 'tool-indicator';
         this.toolIndicator.style.cssText = `
@@ -160,7 +159,6 @@ export class TypingTest {
 
         this.toolIndicator.appendChild(this.toolImage);
 
-        // Store update function globally
         window.updateToolBubble = (toolName) => {
             if (toolName && this.toolImages[toolName]) {
                 this.toolImage.src = this.toolImages[toolName];
@@ -170,7 +168,6 @@ export class TypingTest {
             }
         };
 
-        // Create stats display
         this.statsDisplay = document.createElement('div');
         this.statsDisplay.id = 'stats-display';
         this.statsDisplay.style.cssText = `
@@ -181,8 +178,6 @@ export class TypingTest {
             justify-content: space-around;
         `;
         
-        
-        // Create buttons container
         this.buttonsContainer = document.createElement('div');
         this.buttonsContainer.style.cssText = `
             display: flex;
@@ -190,53 +185,6 @@ export class TypingTest {
             justify-content: center;
             margin-top: 15px;
         `;
-        
-        // Create Stop button
-        this.stopButton = document.createElement('button');
-        this.stopButton.textContent = 'Stop Test';
-        this.stopButton.style.cssText = `
-            padding: 10px 20px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            transition: background 0.3s ease;
-        `;
-        this.stopButton.onmouseover = () => {
-            this.stopButton.style.background = '#dc2626';
-        };
-        this.stopButton.onmouseout = () => {
-            this.stopButton.style.background = '#ef4444';
-        };
-        this.stopButton.onclick = () => this.stopTest();
-        
-        // Create Restart button
-        this.restartButton = document.createElement('button');
-        this.restartButton.textContent = 'Restart Test';
-        this.restartButton.style.cssText = `
-            padding: 10px 20px;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            transition: background 0.3s ease;
-        `;
-        this.restartButton.onmouseover = () => {
-            this.restartButton.style.background = '#2563eb';
-        };
-        this.restartButton.onmouseout = () => {
-            this.restartButton.style.background = '#3b82f6';
-        };
-        this.restartButton.onclick = () => this.restartTest();
-        
-       // this.buttonsContainer.appendChild(this.stopButton);
-       // this.buttonsContainer.appendChild(this.restartButton);
 
         this.container.appendChild(this.wordDisplay);
         this.container.appendChild(this.toolIndicator);
@@ -244,16 +192,85 @@ export class TypingTest {
         this.container.appendChild(this.buttonsContainer);
         document.body.appendChild(this.container);
     }
+
+    // Start continuous falling animation
+    startFalling() {
+        if (this.isFalling) return;
+        
+        this.isFalling = true;
+        this.fallStartTime = Date.now();
+        
+        // Random fall duration for variety
+        this.currentFallDuration = Math.random() * (this.maxFallDuration - this.minFallDuration) + this.minFallDuration;
+        
+        console.log(`Word falling for ${(this.currentFallDuration / 1000).toFixed(1)}s`);
+        
+        this.animateFall();
+    }
+
+    // Animation loop for falling
+    animateFall() {
+        if (!this.isFalling) return;
+        
+        const elapsed = Date.now() - this.fallStartTime;
+        const progress = Math.min(elapsed / this.currentFallDuration, 1);
+        
+        // Easing function for natural fall (ease-in)
+        const easedProgress = progress * progress;
+        
+        // Calculate current position
+        const totalDistance = this.targetTopPosition - (-200);
+        this.currentTopPosition = -200 + (totalDistance * easedProgress);
+        
+        this.container.style.top = `${this.currentTopPosition}px`;
+        
+        // Check if reached bottom
+        if (progress >= 1) {
+            console.log("%cWord reached bottom - GAME OVER or penalty!", "color: red; font-size: 16px;");
+            this.onWordReachedBottom();
+            return;
+        }
+        
+        // Continue animation
+        this.fallAnimationFrame = requestAnimationFrame(() => this.animateFall());
+    }
+
+    // Stop falling animation
+    stopFalling() {
+        this.isFalling = false;
+        if (this.fallAnimationFrame) {
+            cancelAnimationFrame(this.fallAnimationFrame);
+            this.fallAnimationFrame = null;
+        }
+    }
+
+    // Reset to top of screen
+    resetPosition() {
+        this.stopFalling();
+        this.currentTopPosition = -200;
+        this.container.style.top = '-200px';
+    }
+
+    // Called when word reaches bottom without being completed
+    onWordReachedBottom() {
+        this.stopFalling();
+        
+        // Penalty logic - damage health, lose points, etc.
+        if (window.gameElements && window.gameElements.victimManager) {
+            window.gameElements.victimManager.healActiveVictim(-50); // 50 damage for missing word
+        }
+        
+        console.log("%c-50 HP for missing word!", "color: red; font-weight: bold;");
+        
+        // Load next word
+        setTimeout(() => {
+            this.nextWord();
+        }, 500);
+    }
     
     bindEvents() {
         document.addEventListener('keydown', (e) => {
-            // Ignore special keys
             if (e.ctrlKey || e.altKey || e.metaKey) return;
-            
-            // Start test on first key press
-            // if (!this.stats.startTime) {
-            //     this.startTest();
-            // }
             
             if (e.key === 'Backspace') {
                 e.preventDefault();
@@ -262,6 +279,11 @@ export class TypingTest {
                 e.preventDefault();
                 this.handleCharacter(e.key);
             }
+        });
+
+        // Update target position on window resize
+        window.addEventListener('resize', () => {
+            this.targetTopPosition = window.innerHeight;
         });
     }
     
@@ -273,7 +295,9 @@ export class TypingTest {
     nextWord() {
         if (this.wordBank.length === 0) return;
         
-        // Random word selection
+        // Reset position to top
+        this.resetPosition();
+        
         const randomIndex = Math.floor(Math.random() * this.wordBank.length);
         this.currentWord = this.wordBank[randomIndex].challenge;
         this.currentIndex = 0;
@@ -281,18 +305,21 @@ export class TypingTest {
         this.stats.totalWords++;
         
         this.renderWord();
+        
+        // Start falling animation after brief delay
+        setTimeout(() => {
+            this.startFalling();
+        }, 100);
     }
     
     handleCharacter(rawChar) {
         if (!this.currentWord) return;
 
-        // Check if hand is in typing zone
         if (!this.isHandInTypingZone()) {
             console.log("Hand not in typing zone!");
             return;
         }
 
-        // Add this check to prevent typing beyond the word length
         if (this.currentIndex >= this.currentWord.length) return;
         
         let char = rawChar;
@@ -320,10 +347,13 @@ export class TypingTest {
         
         // Check if word is complete
         if (this.currentIndex >= this.currentWord.length) {
-            // Check if entire word was correct
             if (this.userInput === this.currentWord) {
                 this.stats.correctWords++;
+                console.log("%cWord completed!", "color: lime; font-weight: bold;");
             }
+            
+            // Stop falling and load next word
+            this.stopFalling();
             
             setTimeout(() => {
                 this.nextWord();
@@ -336,7 +366,6 @@ export class TypingTest {
     }
     
     handleBackspace() {
-        // Check if hand is in typing zone
         if (!this.isHandInTypingZone()) {
             return;
         }
@@ -360,21 +389,20 @@ export class TypingTest {
             span.style.cssText = `
                 display: inline-block;
                 transition: color 0.3s ease;
-                color: ${i < this.currentIndex ? '#000' : '#000'};
+                color: #fff;
             `;
             
-            // Color based on input
             if (i < this.userInput.length) {
                 if (this.userInput[i].toLowerCase() === this.currentWord[i].toLowerCase()) {
-                    span.style.color = '#22c55e'; // Green
+                    span.style.color = '#22c55e';
                 } else {
-                    span.style.color = '#ef4444'; // Red
+                    span.style.color = '#ef4444';
                 }
             }
             
-            // Highlight current character
             if (i === this.currentIndex) {
-                span.style.backgroundColor = '#fef08a'; // Yellow highlight
+                span.style.backgroundColor = '#fef08a';
+                span.style.color = '#000';
                 span.style.padding = '2px 4px';
                 span.style.borderRadius = '3px';
             }
@@ -387,7 +415,6 @@ export class TypingTest {
         const char = document.getElementById(`char-${index}`);
         if (!char) return;
         
-        // Smooth color transition to green
         char.style.color = '#22c55e';
         char.style.transition = 'color 0.4s ease, transform 0.2s ease';
         char.style.transform = 'scale(1.1)';
@@ -401,10 +428,8 @@ export class TypingTest {
         const char = document.getElementById(`char-${index}`);
         if (!char) return;
         
-        // Red color with shake animation
         char.style.color = '#ef4444';
         
-        // Create shake animation
         const keyframes = [
             { transform: 'translateX(0px)' },
             { transform: 'translateX(-5px)' },
@@ -424,7 +449,7 @@ export class TypingTest {
     }
     
     updateStats() {
-        const elapsedTime = (Date.now() - this.stats.startTime) / 1000 / 60; // in minutes
+        const elapsedTime = (Date.now() - this.stats.startTime) / 1000 / 60;
         const wpm = Math.round((this.stats.correctCharacters / 5) / elapsedTime) || 0;
         const accuracy = this.stats.totalCharacters > 0 
             ? Math.round((this.stats.correctCharacters / this.stats.totalCharacters) * 100) 
@@ -450,6 +475,7 @@ export class TypingTest {
     }
     
     reset() {
+        this.stopFalling();
         this.stats = {
             totalWords: 0,
             correctWords: 0,
@@ -467,12 +493,13 @@ export class TypingTest {
         this.userInput = '';
         this.wordDisplay.innerHTML = '';
         this.statsDisplay.innerHTML = '';
+        this.resetPosition();
     }
     
     stopTest() {
+        this.stopFalling();
         const finalStats = this.getStats();
         
-        // Show final results
         this.wordDisplay.innerHTML = `
             <div style="font-size: 24px; color: #666;">Test Stopped!</div>
         `;
@@ -484,10 +511,8 @@ export class TypingTest {
             <div><strong>Duration:</strong> ${Math.round(finalStats.duration)}s</div>
         `;
         
-        // Log detailed stats to console
         console.log('Test stopped. Final statistics:', finalStats);
         
-        // Disable typing
         this.currentWord = null;
         this.stats.startTime = null;
     }
@@ -495,7 +520,6 @@ export class TypingTest {
     restartTest() {
         this.reset();
         
-        // Show ready message
         this.wordDisplay.innerHTML = `
             <div style="font-size: 24px; color: #666;">Ready to start!</div>
         `;
@@ -508,6 +532,7 @@ export class TypingTest {
     }
     
     destroy() {
+        this.stopFalling();
         if (this.container) {
             this.container.remove();
         }
