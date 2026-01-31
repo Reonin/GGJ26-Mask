@@ -1,96 +1,110 @@
 export class HandMotions {
     constructor(BABYLON, scene){
-        const gloveColor = new BABYLON.Color3(1, 1, 1);
-        const gloveMaterial = new BABYLON.StandardMaterial("material", scene);
-        gloveMaterial.albedoColor = gloveColor; // Red color for visibility
-        gloveMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
-   
+        let followingSprite;
+        let isGrabbing = false;
+        let currentFrame = 0;
+        let animationTimer = 0;
+        const FRAME_DURATION = 100; // milliseconds per frame
 
-        const followingMesh = BABYLON.MeshBuilder.CreateSphere("followingMesh", {diameter: 0.4 } , scene);
-        // followingMesh.rotation.x = 82.4000;
-        followingMesh.material = gloveMaterial;
+        // Create a sprite manager for the hand animations
+        // Your sprite sheet: 1536 width / 3 frames = 512 per frame
+        const spriteManager = new BABYLON.SpriteManager(
+            "handSpriteManager", 
+            "/js/sprites/handgrab.png", // Your sprite sheet path
+            1, // Only need 1 sprite instance
+            512, // Cell size (512x512 per frame)
+            scene
+        );
 
-
-        const fingers = [];
-        for (let index = 0; index < 5; index++) {
-            var finger = BABYLON.MeshBuilder.CreateSphere("ellipsoid", {
-                diameterX: 0.05, 
-                diameterY: 0.05, 
-                diameterZ: 0.5, 
-            }, scene);
-            finger.material = gloveMaterial;
-            finger.setParent(followingMesh);
-            finger.position.z = -0.25; 
-            fingers.push(finger);
-            finger.enableEdgesRendering();
-            
-        }
+        // Create the sprite
+        followingSprite = new BABYLON.Sprite("handSprite", spriteManager);
+        followingSprite.width = 5; // Width in world units
+        followingSprite.height = 5; // Height in world units
+        followingSprite.position = new BABYLON.Vector3(0, 5, 0);
+        followingSprite.cellIndex = 0; // Start with frame 0 (idle hand)
         
-        fingers[0].position.x = 0; // middle
-        fingers[1].position.x = -0.10; 
-        fingers[2].position.x = -0.20; 
-        fingers[3].position.x = 0.1; 
-        fingers[4].position.x = 0.20; //thumb
-        fingers[4].position.z = -0.05;
-        fingers[4].rotation.y = -0.523599; //radians
+        // Make sure sprite is visible
+        followingSprite.isVisible = true;
 
+        console.log("Sprite created:", followingSprite);
+        console.log("Sprite manager:", spriteManager);
 
         scene.onPointerMove = function (evt) {
-            // Use scene.pick() with the mouse's clientX and clientY coordinates
             const pickResult = scene.pick(evt.clientX, evt.clientY);
-            // console.log(followingMesh.position.x)
-            if(followingMesh.position.x > 2){
+            
+            if(followingSprite.position.x > 2){
                  console.log("%c Left", "color: orange; font-size: 20px; font-weight: bold;");
-            }else if(followingMesh.position.x < -2) {
+            }else if(followingSprite.position.x < -2) {
                  console.log("%c Right", "color: green; font-size: 20px; font-weight: bold;");
             }else {
                 console.log("%c Center", "color: white; font-size: 20px; font-weight: bold;");
             }
-            // Check if the ray intersected with a mesh (ideally the ground)
+            
             if (pickResult.hit) {
-                // Update the position of the following mesh to the picked point
-                followingMesh.position.x = pickResult.pickedPoint.x;
-                followingMesh.position.y = 5; // May need adjustment for height
-                followingMesh.position.z = pickResult.pickedPoint.z;
+                followingSprite.position.x = pickResult.pickedPoint.x;
+                followingSprite.position.y = 5;
+                followingSprite.position.z = pickResult.pickedPoint.z;
             }
         };
 
+        // Click to start grab animation
+        scene.onPointerDown = function (evt) {
+            if (evt.button === 0 && !isGrabbing) { // Left click
+                isGrabbing = true;
+                currentFrame = 0;
+                animationTimer = 0;
+                console.log("Grab animation started");
+            }
+        };
 
-
-        // Assuming 'scene' is your BABYLON.Scene object
         const box = BABYLON.MeshBuilder.CreateBox("box", { size: 2 }, scene);
 
-        // 1. Create a TransformNode as a pivot
         const pivotNode = new BABYLON.TransformNode("pivot", scene);
-        // Position the pivot node at the desired world position (e.g., origin for now)
         pivotNode.position = new BABYLON.Vector3(0, 0, 0);
 
-        // 2. Parent the box to the pivot node
-        // The box's local position is now relative to pivotNode
-        // To place the box's bottom at the pivot node's position, offset it locally
         box.setParent(pivotNode);
-        box.position.y = -1; // Box height is 2, so local Y of 1 puts the bottom at Y=0 of the parent
+        box.position.y = -1;
 
-  
-        // 3. Create the line mesh
-        // The line starts at the pivot node's absolute position and ends at the sphere's position
-        const linePoints = [pivotNode.absolutePosition, followingMesh.position];
+        const linePoints = [pivotNode.absolutePosition, followingSprite.position];
         const line = BABYLON.MeshBuilder.CreateLines("line", { points: linePoints }, scene);
         line.color = new BABYLON.Color3(0, 0, 0);
         line.enableEdgesRendering();
         line.edgesWidth = 100;
-        line.edgesColor = new BABYLON.Color4(0, 0, 0, 1);;
+        line.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
 
-        // 4. Update the line in the render loop if objects are moving
+        let lastTime = Date.now();
+
         scene.onBeforeRenderObservable.add(() => {
-            // If the pivot or sphere moves, update the line's points
+            // Update line position
             line.setVerticesData(BABYLON.VertexBuffer.PositionKind, [
                 pivotNode.absolutePosition.x, pivotNode.absolutePosition.y, pivotNode.absolutePosition.z,
-                followingMesh.position.x, followingMesh.position.y, followingMesh.position.z
+                followingSprite.position.x, followingSprite.position.y, followingSprite.position.z
             ]);
+
+            // Handle grab animation
+            if (isGrabbing) {
+                const currentTime = Date.now();
+                const deltaTime = currentTime - lastTime;
+                animationTimer += deltaTime;
+
+                if (animationTimer >= FRAME_DURATION) {
+                    currentFrame++;
+                    animationTimer = 0;
+
+                    if (currentFrame >= 3) { // After 3 frames (0, 1, 2)
+                        currentFrame = 0;
+                        isGrabbing = false;
+                        followingSprite.cellIndex = 0; // Return to idle
+                    } else {
+                        followingSprite.cellIndex = currentFrame;
+                    }
+                }
+
+                lastTime = currentTime;
+            } else {
+                lastTime = Date.now();
+                followingSprite.cellIndex = 0; // Idle frame
+            }
         });
     }
-
-        
-    
 }
