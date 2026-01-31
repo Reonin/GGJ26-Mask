@@ -16,7 +16,7 @@
 
   <meta name="theme-color" content="#fafafa">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-  <title>Plague Doctor</title>
+  <title>Plague-arism</title>
   <style>
     html, body {
         overflow: hidden;
@@ -40,7 +40,7 @@
 <body>
   <canvas id="renderCanvas"></canvas>
 
-
+  <p style="font-family: 'Modern Antiqua'", display:none >test<p>
   <script src="js/plugins.js"></script>
     <script type="module">
         let hostPath;
@@ -53,7 +53,15 @@
 
         let { Main } = await import( hostPath + '/js/main.js');
 
-        const init = new Main();
+        const modernAntiqua = new FontFace("Modern Antiqua", 'url("ModernAntiqua-Regular.ttf")', {
+            style: "normal",
+            weight: "400"
+        });
+
+        document.fonts.add(modernAntiqua);
+        document.fonts.ready.then(() => {
+              const init = new Main();
+        });
     </script>
 </body>
 
