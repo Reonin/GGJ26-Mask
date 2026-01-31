@@ -46,11 +46,12 @@ function setUpButtons(advancedTexture, buttonList, light) {
 function setupScore(scene, typingTest, target){
      scene.onBeforeRenderObservable.add(() => {
         if(window.gameStarted){
-            //let points = ((Correct Characters typed - incorrect chars)) *1. WPM 
+            //let points = ((Correct Characters typed - incorrect chars)) *1. WPM
 
             const stats = typingTest.getStats();
-            // target.text = stats.correctWords;
-            target.text = (stats.correctWords - stats.incorrectCharacters) * (1 + stats.wordsPerMinute);
+            const typingScore = (stats.correctWords - stats.incorrectCharacters) * (1 + stats.wordsPerMinute);
+            const toolScore = window.toolScore || 0;
+            target.text = Math.floor(typingScore + toolScore);
         }
     });
 }

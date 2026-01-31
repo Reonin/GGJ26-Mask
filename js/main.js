@@ -7,6 +7,7 @@ import { HandMotions } from './HandMotions.js';
 import {setUpHUD, hideTitleScreen} from './HUDConfig.js';
 import { createToolManager } from './tools.js';
 import { TypingTest } from './scripts/typingTest.js';
+import { ToolQueue } from './ToolQueue.js';
 
 export class Main {
 constructor() {
@@ -118,10 +119,17 @@ constructor() {
         const toolManager = createToolManager(scene);
         toolManager.spawnToolbelt();
 
-        // Connect hand to tool manager for pickup
-        handMotions.setToolManager(toolManager);
+        // Create tool queue and fill with random tools
+        const toolQueue = new ToolQueue();
+        toolQueue.fillQueue(10); // Start with 10 random tools in queue
+        console.log("Tool queue:", toolQueue.getQueue());
+        console.log("Next required tool:", toolQueue.getNextRequired());
 
-        return { scene, toolManager, handMotions };
+        // Connect hand to tool manager and queue for pickup
+        handMotions.setToolManager(toolManager);
+        handMotions.setToolQueue(toolQueue);
+
+        return { scene, toolManager, handMotions, toolQueue };
     };
 
     #toggleDebugger(scene) {
