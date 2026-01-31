@@ -93,9 +93,15 @@ export class AudioManager {
 
   toggleMute() {
     this.isMuted = !this.isMuted;
-    // Use audio engine global volume to mute/unmute all sounds
-    if (this.audioEngine) {
-      this.audioEngine.setGlobalVolume(this.isMuted ? 0 : 1);
+    // Pause/resume theme music
+    if (this.theme) {
+      this.theme.then(s => {
+        if (this.isMuted) {
+          s.pause();
+        } else {
+          s.play();
+        }
+      });
     }
     return this.isMuted;
   }
