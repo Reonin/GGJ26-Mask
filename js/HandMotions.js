@@ -61,13 +61,20 @@ export class HandMotions {
             }
         };
 
-        // Click to start grab animation
-        scene.onPointerDown = function (evt) {
+        // Click to start grab animation and pickup/drop tools
+        scene.onPointerDown = (evt) => {
             if (evt.button === 0 && !isGrabbing) { // Left click
                 isGrabbing = true;
                 currentFrame = 0;
                 animationTimer = 0;
                 console.log("Grab animation started");
+
+                // Pickup or drop tool
+                if (this.isHoldingTool()) {
+                    this.dropTool();
+                } else {
+                    this.tryPickupTool();
+                }
             }
         };
 
@@ -125,7 +132,7 @@ export class HandMotions {
             // Make held tool follow the hand
             if (self.heldTool) {
                 self.heldTool.position.x = followingSprite.position.x;
-                self.heldTool.position.z = followingSprite.position.z;
+                self.heldTool.position.z = followingSprite.position.z + 1.5; // Offset down from hand
                 self.heldTool.position.y = 1.5; // Hold above ground
             }
         });

@@ -46,14 +46,6 @@ constructor() {
                     case 'D':
                     case 'd':
                         break;
-                    case ' ':
-                        // Try to pick up or drop a tool
-                        if (handMotions.isHoldingTool()) {
-                            handMotions.dropTool();
-                        } else {
-                            handMotions.tryPickupTool();
-                        }
-                        break;
                     case 'Enter':
                         hideTitleScreen(this.light);
                         this.gameManager.changeRound(1, true);
