@@ -21,6 +21,7 @@ export function createVictim(scene) {
     victimMat.emissiveColor = new BABYLON.Color3(0.3, 0.25, 0.2);
     victimMat.backFaceCulling = false;
     victim.material = victimMat;
+    victim.isPickable = false;
 
     return victim;
 }

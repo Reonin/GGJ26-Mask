@@ -21,6 +21,7 @@ export function createPlagueDoctor(scene) {
     plagueDoctorMat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.12);
     plagueDoctorMat.backFaceCulling = false;
     plagueDoctor.material = plagueDoctorMat;
+    plagueDoctor.isPickable = false;
 
     return plagueDoctor;
 }

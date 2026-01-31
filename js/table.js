@@ -21,6 +21,7 @@ export function createTable(scene) {
     tableMat.emissiveColor = new BABYLON.Color3(0.2, 0.12, 0.08);
     tableMat.backFaceCulling = false;
     table.material = tableMat;
+    table.isPickable = false;
 
     return table;
 }
