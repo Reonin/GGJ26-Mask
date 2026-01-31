@@ -5,6 +5,7 @@ const TABLE_CENTER_X = 0;
 const TABLE_Z = -4;
 const OFF_SCREEN_X = 12; // Distance to move off screen
 
+
 export function createPatientQueue(scene) {
     // Create initial table and victim
     let currentTable = createTable(scene);
@@ -12,7 +13,7 @@ export function createPatientQueue(scene) {
 
     // Parent the victim to the table so they move together
     currentVictim.parent = currentTable;
-    currentVictim.position = new BABYLON.Vector3(0, 0.01, 0);
+    currentVictim.position = new BABYLON.Vector3(4, 0.01, 0);
     currentVictim.rotation.x = 0; // Reset rotation since it inherits from parent
 
     const queue = {
