@@ -167,7 +167,6 @@ function setupTimer(scene, engine, target){
 }
 
 export function resetToDefault() {
-    console.log('resetting')
     HUD.title.isVisible = true;
     HUD.subtitle.isVisible = true;
     buttonList.startGameButton.isVisible = true;
