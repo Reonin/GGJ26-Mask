@@ -4,15 +4,16 @@ export function createDancingSprite(scene) {
         "plagueDoctorManager",
         "js/sprites/dancingDoc.png",  // Changed from ../ to ./
         10,
-        32,
+        500,
         scene
     );
 
     const plagueDoctor = new BABYLON.Sprite("plagueDoctor", spriteManager);
     plagueDoctor.position = new BABYLON.Vector3(0, 1, 0);
-    plagueDoctor.width = 2;
-    plagueDoctor.height = 2;
-
+    
+    plagueDoctor.width = 5;
+    plagueDoctor.height = 5;
+    
     plagueDoctor.playAnimation(0, 4, true, 300);
 
     // Create speech bubble background as a disc in world space
