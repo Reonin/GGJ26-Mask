@@ -20,6 +20,7 @@ export class HandMotions {
         this.heldTool = null;
         this.toolManager = null;
         this.toolQueue = null;
+        this.victimManager = null;
 
         // Victim drop zone (matches victim position from victim.js)
         this.victimZone = {
@@ -154,6 +155,10 @@ export class HandMotions {
         this.toolQueue = toolQueue;
     }
 
+    setVictimManager(victimManager) {
+        this.victimManager = victimManager;
+    }
+
     isOverVictim() {
         const handPos = this.followingSprite.position;
         const dx = handPos.x - this.victimZone.x;
@@ -206,9 +211,9 @@ export class HandMotions {
         const droppedTool = this.heldTool;
         const toolType = droppedTool.metadata.toolType;
 
-        // Check if dropping on victim - use the tool
-        if (this.isOverVictim() && this.toolQueue) {
-            this.toolQueue.useTool(toolType);
+        // Check if dropping on victim - use the tool on the victim
+        if (this.isOverVictim() && this.victimManager) {
+            this.victimManager.useToolOnVictim(toolType);
         }
 
         // Return tool to original position in toolbelt

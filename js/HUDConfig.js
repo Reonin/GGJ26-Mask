@@ -110,6 +110,15 @@ function setupVictimHealing(scene, typingTest, victimManager) {
 
     scene.onBeforeRenderObservable.add(() => {
         if(window.gameStarted && victimManager) {
+            // Only allow healing if the correct tool has been used on the victim
+            if (!victimManager.isActiveVictimReady()) {
+                // Update tracking but don't heal
+                const stats = typingTest.getStats();
+                lastCorrectWords = stats.correctWords;
+                lastIncorrectCharacters = stats.incorrectCharacters;
+                return;
+            }
+
             const stats = typingTest.getStats();
             const currentCorrectWords = stats.correctWords;
             const currentIncorrectCharacters = stats.incorrectCharacters;
