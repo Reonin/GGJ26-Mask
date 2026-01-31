@@ -94,12 +94,12 @@ export class HandMotions {
         box.setParent(pivotNode);
         box.position.y = -1;
 
-        const linePoints = [pivotNode.absolutePosition, followingSprite.position];
-        const line = BABYLON.MeshBuilder.CreateLines("line", { points: linePoints }, scene);
-        line.color = new BABYLON.Color3(0, 0, 0);
-        line.enableEdgesRendering();
-        line.edgesWidth = 100;
-        line.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
+        // const linePoints = [pivotNode.absolutePosition, followingSprite.position];
+        // const line = BABYLON.MeshBuilder.CreateLines("line", { points: linePoints }, scene);
+        // line.color = new BABYLON.Color3(0, 0, 0);
+        // line.enableEdgesRendering();
+        // line.edgesWidth = 100;
+        // line.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
 
         let lastTime = Date.now();
 
@@ -107,10 +107,10 @@ export class HandMotions {
         const self = this;
         scene.onBeforeRenderObservable.add(() => {
             // Update line position
-            line.setVerticesData(BABYLON.VertexBuffer.PositionKind, [
-                pivotNode.absolutePosition.x, pivotNode.absolutePosition.y, pivotNode.absolutePosition.z,
-                followingSprite.position.x, followingSprite.position.y, followingSprite.position.z
-            ]);
+            // line.setVerticesData(BABYLON.VertexBuffer.PositionKind, [
+            //     pivotNode.absolutePosition.x, pivotNode.absolutePosition.y, pivotNode.absolutePosition.z,
+            //     followingSprite.position.x, followingSprite.position.y, followingSprite.position.z
+            // ]);
 
             // Handle grab animation
             if (isGrabbing) {
