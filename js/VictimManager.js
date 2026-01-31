@@ -13,12 +13,10 @@ export class VictimManager {
         this.activeVictimIndex = 0;
         
         this.patientPositions = [
-            {hori:0, vert:-4},
-            {hori:4, vert:-3},
-            {hori:-4, vert:-3},
-            {hori:6, vert:-1},
-            {hori:-6, vert:-1},
-            {hori:0, vert:-6}
+            {hori:0, vert: 8},
+            {hori: 7, vert: 8},
+            {hori:-7, vert: 8},
+    
         ];
         
         // Track which positions are occupied
@@ -102,38 +100,41 @@ export class VictimManager {
     start() {
         console.log("%cVictimManager started!", "color: lime; font-size: 16px;");
         this.lastSpawnTime = Date.now();
-        this.spawnVictim();
+        for (let index = 0; index < 3; index++) {
+            this.spawnVictim();
+        }
+       
         
         this.scene.onBeforeRenderObservable.add(() => {
             if (window.gameStarted && !this.gameOver) {
-                this.update();
+                //this.update();
                 this.updateHealthBar(); // Update health bar every frame
             }
         });
     }
 
-    update() {
-        const currentTime = Date.now();
+    // update() {
+    //     const currentTime = Date.now();
         
-        // Check if we should spawn a new victim and have available positions
-        if (currentTime - this.lastSpawnTime >= this.spawnInterval) {
-            if (this.victims.length < this.maxVictims && this.availablePositions.size > 0) {
-                this.spawnVictim();
-                this.lastSpawnTime = currentTime;
-            }
-        }
+    //     // Check if we should spawn a new victim and have available positions
+    //     if (currentTime - this.lastSpawnTime >= this.spawnInterval) {
+    //         if (this.victims.length < this.maxVictims && this.availablePositions.size > 0) {
+    //             this.spawnVictim();
+    //             this.lastSpawnTime = currentTime;
+    //         }
+    //     }
 
-        // Check if max victims reached
-        if (this.victims.length >= this.maxVictims) {
-            this.triggerGameOver();
-        }
+    //     // Check if max victims reached
+    //     if (this.victims.length >= this.maxVictims) {
+    //         this.triggerGameOver();
+    //     }
 
-        // Check if active victim is healed
-        const activeVictim = this.getActiveVictim();
-        if (activeVictim && activeVictim.currentHealth >= activeVictim.maxHealth) {
-            this.healVictim(this.activeVictimIndex);
-        }
-    }
+    //     // Check if active victim is healed
+    //     const activeVictim = this.getActiveVictim();
+    //     if (activeVictim && activeVictim.currentHealth >= activeVictim.maxHealth) {
+    //         this.healVictim(this.activeVictimIndex);
+    //     }
+    // }
 
     getNextAvailablePosition() {
         // Get first available position from the Set
@@ -157,6 +158,7 @@ export class VictimManager {
         
         victim.position.x = this.patientPositions[positionIndex].hori;
         victim.position.z = this.patientPositions[positionIndex].vert;
+        victim.position.y = 5;
         
         this.occupiedPositions.add(positionIndex);
         this.availablePositions.delete(positionIndex);
