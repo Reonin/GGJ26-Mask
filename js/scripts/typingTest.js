@@ -136,17 +136,18 @@ export class TypingTest {
             top: -200px;
             left: ${20 + (this.instanceId - 1) * 30}%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            padding: 30px 50px;
-            border-radius: 15px;
+            background: #07481f;
+            padding: 30px 30px;
             z-index: 1000;
             font-family: 'Courier New', monospace;
             min-width: 400px;
             text-align: center;
-            border: 3px solid #666;
+            border: 3px solid #07481f;
             pointer-events: none;
         `;
 
+        this.container.classList.add('gas-cloud');
+        
         this.wordDisplay = document.createElement('div');
         this.wordDisplay.id = `word-display-${this.instanceId}`;
         this.wordDisplay.style.cssText = `
