@@ -1,96 +1,119 @@
 export const TOOL_NAMES = ['garlic', 'rosaries', 'cross', 'holyWater', 'scalpel'];
-const TOOL_RADIUS = 0.4;
-const MIN_DISTANCE = 4; // Minimum distance between tools
-const MAX_SPAWN_ATTEMPTS = 20; // Max attempts to find valid position
+
+const TOOL_RADIUS = 0.8;
+
+// Toolbelt configuration
+const TOOLBELT = {
+    z: 5,           // Bottom of screen (positive Z)
+    y: 1,         // Above toolbelt background
+    spacing: 2,     // Space between tools
+    startX: -3.4    // Leftmost tool position
+};
 
 // Tool types with their images
 const TOOL_TYPES = {
     garlic: {
         name: 'garlic',
-        image: './assets/tools/garlic.svg'
+        image: './assets/tools/garlic.svg',
+        slot: 0
     },
     rosaries: {
         name: 'rosaries',
-        image: './assets/tools/rosaries.svg'
+        image: './assets/tools/rosaries.svg',
+        slot: 1
     },
     cross: {
         name: 'cross',
-        image: './assets/tools/cross.svg'
+        image: './assets/tools/cross.svg',
+        slot: 2
     },
     holyWater: {
         name: 'holyWater',
-        image: './assets/tools/holyWater.svg'
+        image: './assets/tools/holyWater.svg',
+        slot: 3
     },
     scalpel: {
         name: 'scalpel',
-        image: './assets/tools/scalpel.svg'
+        image: './assets/tools/scalpel.svg',
+        slot: 4
     }
 };
 
-const ALL_TOOL_NAMES = Object.keys(TOOL_TYPES);
-const MAX_TOOLS = ALL_TOOL_NAMES.length;
-
-// Bounds for random placement (visible area from camera)
-const BOUNDS = {
-    minX: -8,
-    maxX: 8,
-    minZ: -6,
-    maxZ: 6
-};
-
-function getRandomPosition() {
-    const x = BOUNDS.minX + Math.random() * (BOUNDS.maxX - BOUNDS.minX);
-    const z = BOUNDS.minZ + Math.random() * (BOUNDS.maxZ - BOUNDS.minZ);
-    return { x, z };
-}
-
-function distanceBetween(pos1, pos2) {
-    const dx = pos1.x - pos2.x;
-    const dz = pos1.z - pos2.z;
-    return Math.sqrt(dx * dx + dz * dz);
-}
-
-function findValidPosition(tools) {
-    for (let attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; attempt++) {
-        const pos = getRandomPosition();
-        let valid = true;
-
-        for (const tool of tools) {
-            const dist = distanceBetween(pos, { x: tool.position.x, z: tool.position.z });
-            if (dist < MIN_DISTANCE) {
-                valid = false;
-                break;
-            }
-        }
-
-        if (valid) return pos;
-    }
-    // Fallback to random position if can't find valid one
-    return getRandomPosition();
+function getToolbeltPosition(slot) {
+    return {
+        x: TOOLBELT.startX + (slot * TOOLBELT.spacing),
+        y: TOOLBELT.y,
+        z: TOOLBELT.z
+    };
 }
 
 export function createToolManager(scene) {
     const tools = [];
-    const spawnedTypes = new Set(); // Track which tool types are on screen
+    const spawnedTypes = new Set();
+    let toolbeltMesh = null;
+
+    // Create the toolbelt background
+    function createToolbeltBackground() {
+        const beltWidth = 12;
+        const beltHeight = 2.4;
+
+        const belt = BABYLON.MeshBuilder.CreatePlane("toolbelt", {
+            width: beltWidth,
+            height: beltHeight
+        }, scene);
+
+        belt.rotation.x = -Math.PI / 2;
+        belt.position = new BABYLON.Vector3(0, 0.05, TOOLBELT.z + 0.3);
+        belt.isPickable = false;
+
+        const beltMat = new BABYLON.StandardMaterial("toolbeltMat", scene);
+        beltMat.emissiveTexture = new BABYLON.Texture('./assets/tools/toolbelt.svg', scene);
+        beltMat.emissiveTexture.hasAlpha = true;
+        beltMat.opacityTexture = new BABYLON.Texture('./assets/tools/toolbelt.svg', scene);
+        beltMat.disableLighting = true;
+        beltMat.backFaceCulling = false;
+        belt.material = beltMat;
+
+        return belt;
+    }
 
     const toolManager = {
         tools,
         spawnedTypes,
 
-        spawnTool(specificType = null) {
-            if (tools.length >= MAX_TOOLS) return null;
-
-            // Determine which tool type to spawn
-            let toolType;
-            if (specificType && TOOL_TYPES[specificType] && !spawnedTypes.has(specificType)) {
-                toolType = TOOL_TYPES[specificType];
-            } else {
-                // Find an unspawned tool type
-                const available = ALL_TOOL_NAMES.filter(name => !spawnedTypes.has(name));
-                if (available.length === 0) return null;
-                const randomName = available[Math.floor(Math.random() * available.length)];
-                toolType = TOOL_TYPES[randomName];
+        // Spawn all tools in the toolbelt
+        spawnToolbelt() {
+            // Create toolbelt background if not exists
+            if (!toolbeltMesh) {
+                toolbeltMesh = createToolbeltBackground();
             }
+            let totalTools = Object.keys(TOOL_TYPES).length;
+
+            TOOL_NAMES.forEach(name => {
+                if(totalTools == 5){
+                    TOOLBELT.startX = TOOLBELT.startX - 1.4;
+                }
+                else if(totalTools == 4){
+                    TOOLBELT.startX = TOOLBELT.startX - .14;
+                }
+                else if(totalTools == 3){
+                    TOOLBELT.startX = TOOLBELT.startX - .3;
+                }
+                else if(totalTools == 2){
+                    TOOLBELT.startX = TOOLBELT.startX - .2;
+                }
+                this.spawnTool(name);
+                totalTools = totalTools - 1;
+
+            });
+            return tools;
+        },
+
+        spawnTool(specificType = null) {
+            if (!specificType || !TOOL_TYPES[specificType]) return null;
+            if (spawnedTypes.has(specificType)) return null;
+
+            const toolType = TOOL_TYPES[specificType];
 
             const tool = BABYLON.MeshBuilder.CreateDisc("tool_" + toolType.name, {
                 radius: TOOL_RADIUS,
@@ -98,21 +121,23 @@ export function createToolManager(scene) {
             }, scene);
 
             // Store the tool type on the mesh for reference
-            tool.metadata = { toolType: toolType.name };
+            tool.metadata = { toolType: toolType.name, slot: toolType.slot };
+            tool.isPickable = false;
 
-            // Rotate to lay flat on ground (face up toward camera)
+            // Rotate to lay flat on ground (face up toward camera) and flip right-side up
             tool.rotation.x = -Math.PI / 2;
+            tool.rotation.z = Math.PI;  // Flip 180 degrees
 
-            // Find position far from other tools
-            const pos = findValidPosition(tools);
-            tool.position = new BABYLON.Vector3(pos.x, 0.1, pos.z);
+            // Position in toolbelt slot
+            const pos = getToolbeltPosition(toolType.slot);
+            tool.position = new BABYLON.Vector3(pos.x, pos.y, pos.z);
 
-            // Material with tool image
+            // Material with tool image (unlit so colors show regardless of scene lighting)
             const toolMat = new BABYLON.StandardMaterial("toolMat_" + toolType.name, scene);
-            toolMat.diffuseTexture = new BABYLON.Texture(toolType.image, scene);
-            toolMat.diffuseTexture.hasAlpha = true;
-            toolMat.useAlphaFromDiffuseTexture = true;
             toolMat.emissiveTexture = new BABYLON.Texture(toolType.image, scene);
+            toolMat.emissiveTexture.hasAlpha = true;
+            toolMat.opacityTexture = new BABYLON.Texture(toolType.image, scene);
+            toolMat.disableLighting = true;
             toolMat.backFaceCulling = false;
             tool.material = toolMat;
 
@@ -132,21 +157,21 @@ export function createToolManager(scene) {
             }
         },
 
-        removeRandomTool() {
-            if (tools.length === 0) return;
-            const index = Math.floor(Math.random() * tools.length);
-            const tool = tools[index];
-            tools.splice(index, 1);
-            if (tool.metadata && tool.metadata.toolType) {
-                spawnedTypes.delete(tool.metadata.toolType);
+        removeToolByType(typeName) {
+            const tool = this.getToolByType(typeName);
+            if (tool) {
+                this.removeTool(tool);
             }
-            tool.dispose();
         },
 
         clearAllTools() {
             tools.forEach(tool => tool.dispose());
             tools.length = 0;
             spawnedTypes.clear();
+            if (toolbeltMesh) {
+                toolbeltMesh.dispose();
+                toolbeltMesh = null;
+            }
         },
 
         getToolByType(typeName) {
@@ -155,15 +180,6 @@ export function createToolManager(scene) {
 
         isTypeSpawned(typeName) {
             return spawnedTypes.has(typeName);
-        },
-
-        spawnMultiple(count) {
-            const spawned = [];
-            for (let i = 0; i < count && tools.length < MAX_TOOLS; i++) {
-                const tool = this.spawnTool();
-                if (tool) spawned.push(tool);
-            }
-            return spawned;
         },
 
         getToolCount() {

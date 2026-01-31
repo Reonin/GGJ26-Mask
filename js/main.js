@@ -20,10 +20,10 @@ constructor() {
 
     //create typing test
     this.typingTest = new TypingTest('js/data/wordBank.json');
-    
-    
+
+
     const PromiseScene = this.createScene();
-    PromiseScene.then(({ scene, toolManager }) => {
+    PromiseScene.then(({ scene, toolManager, handMotions }) => {
         this.engine.runRenderLoop(function () {
             scene.render();
         });
@@ -46,19 +46,19 @@ constructor() {
                     case 'D':
                     case 'd':
                         break;
-                    case ' ':
+                    case 'Enter':
                         hideTitleScreen(this.light);
                         this.gameManager.changeRound(1, true);
                         break;
                     case 'T':
                     case 't':
-                        // Test: spawn a tool
-                        toolManager.spawnTool();
+                        // Spawn the toolbelt
+                        //toolManager.spawnToolbelt();
                         break;
                     case 'R':
                     case 'r':
-                        // Test: remove a random tool
-                        toolManager.removeRandomTool();
+                        // Clear all tools
+                        //toolManager.clearAllTools();
                         break;
                     case '`':
                         this.#toggleDebugger(scene);
@@ -70,7 +70,7 @@ constructor() {
 
    this.boundResizeHandler = this.#handleResize.bind(this);
    window.addEventListener('resize', this.boundResizeHandler);
-    
+
 }
 
     #handleResize(event) {
@@ -98,15 +98,15 @@ constructor() {
 
         this.light = new BABYLON.RectAreaLight("light", new BABYLON.Vector3(0, 1, 10), 3, 10, scene);
         this.light.intensity = 0.35;
-        
+
         //GUI
         const HUD = setUpHUD(BABYLON, scene, this.light, this.engine, this.typingTest);
 
         const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
-        
+
         // Create the dancing plague doctor
         const dancer = createDancingSprite(scene);
-        
+
         const table = createTable(scene);
         const victim = createVictim(scene);
 
@@ -114,12 +114,16 @@ constructor() {
 
         this.audioManager = new AudioManager(BABYLON, scene);
 
-        // Create tool manager (tools spawn on demand)
+        // Create tool manager and spawn toolbelt
         const toolManager = createToolManager(scene);
+        toolManager.spawnToolbelt();
 
-        return { scene, toolManager };
+        // Connect hand to tool manager for pickup
+        handMotions.setToolManager(toolManager);
+
+        return { scene, toolManager, handMotions };
     };
-   
+
     #toggleDebugger(scene) {
         if(scene.debugLayer.isVisible()){
             scene.debugLayer.hide();

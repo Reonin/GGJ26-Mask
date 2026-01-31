@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 80">
+  <!-- Main belt strap -->
+  <rect x="0" y="25" width="400" height="30" fill="#5c4033" rx="5"/>
+  <rect x="0" y="25" width="400" height="30" fill="none" stroke="#3d2817" stroke-width="2" rx="5"/>
+
+  <!-- Belt texture lines -->
+  <line x1="0" y1="35" x2="400" y2="35" stroke="#4a3428" stroke-width="1"/>
+  <line x1="0" y1="45" x2="400" y2="45" stroke="#4a3428" stroke-width="1"/>
+
+  <!-- Tool pouches -->
+  <g id="pouch1">
+    <path d="M20 30 L20 70 Q40 80 60 70 L60 30" fill="#6b4423" stroke="#3d2817" stroke-width="2"/>
+    <rect x="22" y="32" width="36" height="8" fill="#7a5030" rx="2"/>
+  </g>
+
+  <g id="pouch2" transform="translate(60, 0)">
+    <path d="M20 30 L20 70 Q40 80 60 70 L60 30" fill="#6b4423" stroke="#3d2817" stroke-width="2"/>
+    <rect x="22" y="32" width="36" height="8" fill="#7a5030" rx="2"/>
+  </g>
+
+  <g id="pouch3" transform="translate(120, 0)">
+    <path d="M20 30 L20 70 Q40 80 60 70 L60 30" fill="#6b4423" stroke="#3d2817" stroke-width="2"/>
+    <rect x="22" y="32" width="36" height="8" fill="#7a5030" rx="2"/>
+  </g>
+
+  <g id="pouch4" transform="translate(180, 0)">
+    <path d="M20 30 L20 70 Q40 80 60 70 L60 30" fill="#6b4423" stroke="#3d2817" stroke-width="2"/>
+    <rect x="22" y="32" width="36" height="8" fill="#7a5030" rx="2"/>
+  </g>
+
+  <g id="pouch5" transform="translate(240, 0)">
+    <path d="M20 30 L20 70 Q40 80 60 70 L60 30" fill="#6b4423" stroke="#3d2817" stroke-width="2"/>
+    <rect x="22" y="32" width="36" height="8" fill="#7a5030" rx="2"/>
+  </g>
+
+  <!-- Belt buckle left -->
+  <rect x="5" y="28" width="15" height="24" fill="#b8860b" rx="2"/>
+  <rect x="8" y="32" width="9" height="16" fill="#8b6914" rx="1"/>
+
+  <!-- Belt buckle right -->
+  <rect x="380" y="28" width="15" height="24" fill="#b8860b" rx="2"/>
+  <rect x="383" y="32" width="9" height="16" fill="#8b6914" rx="1"/>
+
+  <!-- Rivets/studs -->
+  <circle cx="30" cy="40" r="3" fill="#b8860b"/>
+  <circle cx="90" cy="40" r="3" fill="#b8860b"/>
+  <circle cx="150" cy="40" r="3" fill="#b8860b"/>
+  <circle cx="210" cy="40" r="3" fill="#b8860b"/>
+  <circle cx="270" cy="40" r="3" fill="#b8860b"/>
+  <circle cx="330" cy="40" r="3" fill="#b8860b"/>
+  <circle cx="370" cy="40" r="3" fill="#b8860b"/>
+</svg>
