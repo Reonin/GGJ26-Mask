@@ -50,8 +50,8 @@ export class HandMotions {
         // Make sure sprite is visible
         followingSprite.isVisible = true;
 
-        console.log("Sprite created:", followingSprite);
-        console.log("Sprite manager:", spriteManager);
+        // console.log("Sprite created:", followingSprite);
+        // console.log("Sprite manager:", spriteManager);
 
         scene.onPointerMove = function (evt) {
             // Only pick the ground mesh to avoid collision with UI elements
@@ -72,7 +72,7 @@ export class HandMotions {
                 isGrabbing = true;
                 currentFrame = 0;
                 animationTimer = 0;
-                console.log("Grab animation started");
+                // console.log("Grab animation started");
 
                 // Try to pick up a tool
                 if (!this.isHoldingTool()) {
@@ -203,7 +203,7 @@ export class HandMotions {
             }
         }
 
-        console.log("No tool nearby to pick up");
+        // console.log("No tool nearby to pick up");
         return false;
     }
 
@@ -226,7 +226,7 @@ export class HandMotions {
         }
 
         this.heldTool = null;
-        console.log("Dropped: " + toolType);
+        // console.log("Dropped: " + toolType);
         return droppedTool;
     }
 

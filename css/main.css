@@ -262,23 +262,19 @@ textarea {
 }
 
 .gas-cloud {
-  /* width: 200px; */
-  /* height: 200px; */
-  background: radial-gradient(circle, rgba(173,216,230,0.8) 0%, rgba(100,149,237,0.5) 60%, rgba(72,61,139,0) 100%);
   border-radius: 70%;
-  /* position: relative; */
-  /* filter: blur(8px); */
-  /* animation: drift 10s infinite alternate ease-in-out; */
-  
+  animation: drift 10s infinite alternate ease-in-out;
+  background: #07481f;
   /* Layered shadows for density */
-  box-shadow: 
-    40px 40px 30px 10px rgba(7, 136, 14, 0.5),
-    -30px 50px 40px 5px rgba(126, 236, 0, 0.4),
-    20px -40px 50px 15px rgba(78, 156, 126, 0.3);
+   box-shadow: 
+    0px 0px 0px 15px rgba(7, 136, 14, 0.5),
+    0px 0px 0px 5px rgba(126, 236, 0, 0.4),
+    0px 0px 0px 25px rgba(78, 156, 126, 0.3);
 }
 
 @keyframes drift {
-  0% { transform: scale(0.8); }
-  50% { transform:  scale(1.1); }
-  100% { transform:  scale(0.8); }
+  0% { border-radius: 50% / 10%;}
+  25% { border-radius: 60% 40% 33% 67% / 30% 45% 55% 70%; }
+  50% { border-radius: 10% / 50%;}
+  100% { border-radius:  30% 45% 55% 70% / 60% 40% 33% 67%; }
 }

@@ -1,4 +1,4 @@
-
+const FALL_FACTOR =  1.5; //adjust this up to make it slower
 
 export class TypingTest {
     constructor(wordBankPath = 'js/data/wordBank.json', instanceId = 1) {
@@ -138,7 +138,7 @@ export class TypingTest {
             top: -200px;
             left: ${20 + (this.instanceId - 1) * 30}%;
             transform: translateX(-50%);
-            background: #07481f;
+          
             padding: 30px 30px;
             z-index: 1000;
             font-family: 'Courier New', monospace;
@@ -209,7 +209,7 @@ export class TypingTest {
         this.isFalling = true;
         this.fallStartTime = Date.now();
         this.currentFallDuration =
-            Math.random() * (this.maxFallDuration - this.minFallDuration) + this.minFallDuration;
+          FALL_FACTOR *  Math.random() * (this.maxFallDuration - this.minFallDuration) + this.minFallDuration;
 
         this.animateFall();
     }
@@ -383,10 +383,12 @@ export class TypingTest {
         if (this.currentIndex >= this.currentWord.length) {
             if (this.userInput === this.currentWord) {
                 this.stats.correctWords++;
+                //Fix for being able to type gibberish and succeed because tool was right
+                this.stopFalling();
+                setTimeout(() => this.nextWord(), 500);
             }
 
-            this.stopFalling();
-            setTimeout(() => this.nextWord(), 500);
+           
         } else {
             this.renderWord();
         }

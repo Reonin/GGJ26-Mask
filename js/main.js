@@ -39,7 +39,7 @@ export class Main {
             scene.onKeyboardObservable.add((kbInfo) => {
                 if (kbInfo.type === BABYLON.KeyboardEventTypes.KEYDOWN) {
                     const key = kbInfo.event.key;
-                    console.log("KEY DOWN:", key);
+                    // console.log("KEY DOWN:", key);
 
                     let alphabetical;
                     if (/^[a-zA-Z]$/.test(key)) {
