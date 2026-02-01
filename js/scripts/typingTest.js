@@ -272,7 +272,7 @@ export class TypingTest {
             return;
         }
 
-        // Damage the victim below this typing test
+        // Damage the victim below this typing test (may move test to different column if victim dies)
         if (window.gameElements?.victimManager) {
             window.gameElements.victimManager.damageVictimByTypingTest(this.instanceId, 66);
         }
@@ -283,7 +283,11 @@ export class TypingTest {
             return;
         }
 
-        setTimeout(() => this.nextWord(), 500);
+        setTimeout(() => {
+            if (window.gameStarted) {
+                this.nextWord();
+            }
+        }, 500);
     }
 
     // -------------------------------------------------------------
@@ -315,12 +319,28 @@ export class TypingTest {
     nextWord() {
         if (this.wordBank.length === 0) return;
 
+        // Get the column/position for this typing test
+        const victimManager = window.gameElements?.victimManager;
+        const positionIndex = victimManager?.typingTestToVictimMap.get(this.instanceId);
+
+        // Check if we need to delay to prevent overlap
+        if (victimManager && positionIndex !== undefined) {
+            const delay = victimManager.getDelayForColumn(positionIndex);
+            if (delay > 0) {
+                setTimeout(() => this.nextWord(), delay + 100);
+                return;
+            }
+        }
+
+        // Unregister previous tool if there was one
+        if (this.currentTool && victimManager && positionIndex !== undefined) {
+            victimManager.unregisterToolFromColumn(positionIndex, this.currentTool);
+        }
+
         this.resetPosition();
 
-
-        //console.warn(timepassed);
         const timepassed = this.getStats().duration;
-        // Difficulty ramps up to medium words after a minute and hard words at 2 
+        // Difficulty ramps up to medium words after a minute and hard words at 2
         if(timepassed > 60 && timepassed < 120){
             this.wordBank = this.medList;
         }
@@ -336,11 +356,20 @@ export class TypingTest {
         this.userInput = '';
         this.stats.totalWords++;
 
-        // Pick a random tool for this word
-        const toolNames = Object.keys(this.toolImages);
-        const randomTool = toolNames[Math.floor(Math.random() * toolNames.length)];
+        // Pick a tool that's not already in use in this column
+        let availableTools = Object.keys(this.toolImages);
+        if (victimManager && positionIndex !== undefined) {
+            availableTools = victimManager.getAvailableToolsForColumn(positionIndex);
+        }
+        const randomTool = availableTools[Math.floor(Math.random() * availableTools.length)];
         this.currentTool = randomTool;
         this.updateToolBubble(randomTool);
+
+        // Register the tool as active in this column
+        if (victimManager && positionIndex !== undefined) {
+            victimManager.registerToolInColumn(positionIndex, randomTool);
+            victimManager.registerWordStartInColumn(positionIndex);
+        }
 
         this.renderWord();
 

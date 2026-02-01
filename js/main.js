@@ -174,6 +174,37 @@ export class Main {
             victimManager
         };
 
+        // Function to create a new typing test for a victim (called when another victim dies)
+        window.createTypingTestForVictim = (positionIndex, newTestId, delay = 0) => {
+            setTimeout(() => {
+                // Create a new typing test
+                const newTest = new TypingTest('js/data/wordBank.json', newTestId);
+
+                // Position it based on the target victim's position
+                // Position index 0 = right (20%), 1 = center (50%), 2 = left (80%)
+                const leftPercent = 20 + positionIndex * 30;
+                newTest.container.style.left = `${leftPercent}%`;
+
+                // Make sure container is visible
+                newTest.container.style.display = 'block';
+
+                // Register in global typing tests
+                window.typingTests = window.typingTests || {};
+                window.typingTests[newTestId] = newTest;
+                this.typingTests[newTestId] = newTest;
+
+                // Start the new test if game is running (with delay for word bank to load)
+                if (window.gameStarted) {
+                    setTimeout(() => {
+                        newTest.startTest();
+                    }, 500); // Wait for word bank to load
+                }
+
+                console.log(`%cCreated new typing test ${newTestId} at position ${positionIndex} (${leftPercent}%)`,
+                    "color: lime; font-size: 14px;");
+            }, delay);
+        };
+
         return { scene, toolManager, handMotions, toolQueue };
     }
 
