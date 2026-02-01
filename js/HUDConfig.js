@@ -190,7 +190,11 @@ export function resetToDefault() {
     HUD.subtitle.isVisible = true;
     buttonList.startGameButton.isVisible = true;
 
-    Object.values(HUD.typingTests).forEach(test => test.reset());
+    Object.values(HUD.typingTests).forEach(test => {
+        test.resetPosition()
+        test.stopTest()
+
+    });
 
     window.toolScore = 0;
 }

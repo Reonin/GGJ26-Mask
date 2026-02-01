@@ -1,3 +1,5 @@
+
+
 export class TypingTest {
     constructor(wordBankPath = 'js/data/wordBank.json', instanceId = 1) {
         this.instanceId = instanceId;
@@ -204,8 +206,6 @@ export class TypingTest {
     // FALLING ANIMATION
     // -------------------------------------------------------------
     startFalling() {
-        if (this.isFalling) return;
-
         this.isFalling = true;
         this.fallStartTime = Date.now();
         this.currentFallDuration =
@@ -248,11 +248,56 @@ export class TypingTest {
     onWordReachedBottom() {
         this.stopFalling();
 
+        // Check if game is still active before damaging
+        if (!window.gameStarted) {
+            console.log("Game not active, skipping damage");
+            return;
+        }
+
+        // Damage the victim below this typing test
         if (window.gameElements?.victimManager) {
-            window.gameElements.victimManager.healActiveVictim(-50);
+            window.gameElements.victimManager.damageVictimByTypingTest(this.instanceId, 66);
+        }
+
+        // Check again if game ended (in case damage triggered game over)
+        if (!window.gameStarted) {
+            console.log("Game ended, stopping typing test");
+            return;
         }
 
         setTimeout(() => this.nextWord(), 500);
+    }
+
+    nextWord() {
+        if (this.wordBank.length === 0) return;
+        
+        // Don't start new word if game isn't active
+        if (!window.gameStarted) {
+            console.log("Game not started, skipping new word");
+            return;
+        }
+
+        this.resetPosition();
+
+        const randomIndex = Math.floor(Math.random() * this.wordBank.length);
+        this.currentWord = this.wordBank[randomIndex].challenge;
+        this.currentIndex = 0;
+        this.userInput = '';
+        this.stats.totalWords++;
+
+        const toolNames = Object.keys(this.toolImages);
+        const randomTool = toolNames[Math.floor(Math.random() * toolNames.length)];
+        this.currentTool = randomTool;
+        this.updateToolBubble(randomTool);
+
+        this.renderWord();
+
+        setTimeout(() => {
+            // Check again before starting fall animation
+            if (window.gameStarted) {
+                this.startFalling();
+            }
+        }, 100);
     }
 
     // -------------------------------------------------------------
@@ -443,12 +488,12 @@ export class TypingTest {
         this.stats.wordsPerMinute = wpm;
         this.stats.accuracy = accuracy;
 
-        this.statsDisplay.innerHTML = `
-            <div><strong>WPM:</strong> ${wpm}</div>
-            <div><strong>Accuracy:</strong> ${accuracy}%</div>
-            <div><strong>Words:</strong> ${this.stats.correctWords}/${this.stats.totalWords}</div>
-            <div><strong>Errors:</strong> ${this.stats.incorrectCharacters}</div>
-        `;
+        // this.statsDisplay.innerHTML = `
+        //     <div><strong>WPM:</strong> ${wpm}</div>
+        //     <div><strong>Accuracy:</strong> ${accuracy}%</div>
+        //     <div><strong>Words:</strong> ${this.stats.correctWords}/${this.stats.totalWords}</div>
+        //     <div><strong>Errors:</strong> ${this.stats.incorrectCharacters}</div>
+        // `;
     }
 
     getStats() {

@@ -135,8 +135,6 @@ export class Main {
         const dancer = createDancingSprite(scene);
         dancer.isVisible = false;
 
-        const table = createTable(scene);
-        table.isVisible = false;
 
         const victim = createVictim(scene);
         const victimManager = new VictimManager(scene, createVictim);
@@ -171,7 +169,6 @@ export class Main {
 
         window.gameElements = {
             dancer,
-            table,
             handMotions,
             toolManager,
             victimManager
