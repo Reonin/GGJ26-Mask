@@ -191,10 +191,20 @@ export function resetToDefault() {
     buttonList.startGameButton.isVisible = true;
 
     Object.values(HUD.typingTests).forEach(test => {
-        test.resetPosition()
-        test.stopTest()
-
+        test.resetPosition();
+        test.stopTest();
+        test.container.style.display = 'none';
     });
+
+    // Also hide any dynamically created typing tests
+    if (window.typingTests) {
+        Object.values(window.typingTests).forEach(test => {
+            if (test) {
+                test.stopFalling();
+                test.container.style.display = 'none';
+            }
+        });
+    }
 
     window.toolScore = 0;
 }
@@ -211,6 +221,9 @@ export function hideTitleScreen(light) {
 
     // Start typing tests with staggered delays so words don't all fall at once
     Object.values(HUD.typingTests).forEach((test, index) => {
+        // Make container visible again
+        test.container.style.display = 'block';
+
         const delay = index * (1500 + Math.random() * 2000); // 1.5-3.5 seconds between each
         setTimeout(() => {
             if (window.gameStarted) {
