@@ -5,6 +5,9 @@ export class TypingTest {
         this.instanceId = instanceId;
 
         this.wordBank = [];
+        this.easyList = [];
+        this.medList = [];
+        this.hardList = [];
         this.currentWord = null;
         this.currentIndex = 0;
         this.userInput = '';
@@ -117,6 +120,7 @@ export class TypingTest {
             const response = await fetch(path);
             const data = await response.json();
             this.wordBank = Object.values(data);
+            this.sortWordsIntoBanks();
         } catch (error) {
             console.error('Error loading word bank:', error);
             this.wordBank = [
@@ -127,6 +131,20 @@ export class TypingTest {
         }
     }
 
+
+    sortWordsIntoBanks(){
+        for (let index = 0; index < this.wordBank.length; index++) {
+           if(this.wordBank[index].difficulty === "easy"){
+            this.easyList.push(this.wordBank[index]);
+           }else if(this.wordBank[index].difficulty === "medium"){
+             this.medList.push(this.wordBank[index]);
+           }
+           else{
+             this.hardList.push(this.wordBank[index]);
+           }
+            
+        }
+    }
     // -------------------------------------------------------------
     // UI CREATION
     // -------------------------------------------------------------
@@ -268,38 +286,6 @@ export class TypingTest {
         setTimeout(() => this.nextWord(), 500);
     }
 
-    nextWord() {
-        if (this.wordBank.length === 0) return;
-        
-        // Don't start new word if game isn't active
-        if (!window.gameStarted) {
-            console.log("Game not started, skipping new word");
-            return;
-        }
-
-        this.resetPosition();
-
-        const randomIndex = Math.floor(Math.random() * this.wordBank.length);
-        this.currentWord = this.wordBank[randomIndex].challenge;
-        this.currentIndex = 0;
-        this.userInput = '';
-        this.stats.totalWords++;
-
-        const toolNames = Object.keys(this.toolImages);
-        const randomTool = toolNames[Math.floor(Math.random() * toolNames.length)];
-        this.currentTool = randomTool;
-        this.updateToolBubble(randomTool);
-
-        this.renderWord();
-
-        setTimeout(() => {
-            // Check again before starting fall animation
-            if (window.gameStarted) {
-                this.startFalling();
-            }
-        }, 100);
-    }
-
     // -------------------------------------------------------------
     // INPUT HANDLING
     // -------------------------------------------------------------
@@ -331,6 +317,19 @@ export class TypingTest {
 
         this.resetPosition();
 
+
+        //console.warn(timepassed);
+        const timepassed = this.getStats().duration;
+        // Difficulty ramps up to medium words after a minute and hard words at 2 
+        if(timepassed > 60 && timepassed < 120){
+            this.wordBank = this.medList;
+        }
+        else if(timepassed > 120) {
+            this.wordBank = this.hardList;
+        }
+        else {
+            this.wordBank = this.easyList;
+        }
         const randomIndex = Math.floor(Math.random() * this.wordBank.length);
         this.currentWord = this.wordBank[randomIndex].challenge;
         this.currentIndex = 0;
