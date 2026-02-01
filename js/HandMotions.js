@@ -6,11 +6,18 @@ export class HandMotions {
         let animationTimer = 0;
         const FRAME_DURATION = 100; // milliseconds per frame
 
+        let hostPath;
+        if(location.hostname === "localhost"){
+            hostPath = '.';
+        }
+        else {
+            hostPath = '/GGJ26-Mask';
+        }
         // Create a sprite manager for the hand animations
         // Your sprite sheet: 1536 width / 3 frames = 512 per frame
         const spriteManager = new BABYLON.SpriteManager(
             "handSpriteManager",
-            "/js/sprites/handgrab.png", // Your sprite sheet path
+            hostPath + "/js/sprites/handgrab.png", // Your sprite sheet path
             1, // Only need 1 sprite instance
             512, // Cell size (512x512 per frame)
             scene
