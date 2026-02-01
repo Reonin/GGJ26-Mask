@@ -207,6 +207,7 @@ export function hideTitleScreen(light) {
 
     light.width = 30;
     light.intensity = 1.55;
+     document.body.style.cursor = "none";
 
     Object.values(HUD.typingTests).forEach(test => test.startTest());
 
