@@ -18,7 +18,7 @@ export class Main {
 
         const canvas = document.getElementById("renderCanvas");
         this.engine = new BABYLON.Engine(canvas, true, { stencil: true });
-        document.body.style.cursor = "none";
+       
 
         // ---------------------------------------------------------
         // CREATE THREE TYPING TEST INSTANCES (A1 behavior)
