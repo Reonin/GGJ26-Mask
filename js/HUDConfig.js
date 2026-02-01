@@ -209,7 +209,15 @@ export function hideTitleScreen(light) {
     light.intensity = 1.55;
      document.body.style.cursor = "none";
 
-    Object.values(HUD.typingTests).forEach(test => test.startTest());
+    // Start typing tests with staggered delays so words don't all fall at once
+    Object.values(HUD.typingTests).forEach((test, index) => {
+        const delay = index * (1500 + Math.random() * 2000); // 1.5-3.5 seconds between each
+        setTimeout(() => {
+            if (window.gameStarted) {
+                test.startTest();
+            }
+        }, delay);
+    });
 
     if (HUD.victimManager) {
         HUD.victimManager.start();
