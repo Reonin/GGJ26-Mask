@@ -9,36 +9,34 @@ export function createVictim(scene, index = 0) {
     // Create sprite manager for this victim
     const spriteManager = new BABYLON.SpriteManager(
         `victimSpriteManager_${index}`,
-        victimSprites[index] || victimSprites[0], // Fallback to first sprite
-        1, // Only 1 sprite needed
-        { width: 64, height: 64 }, // Adjust to your sprite size
+        victimSprites[index] || victimSprites[0],
+        1,
+        { width: 64, height: 64 },
         scene
     );
 
-    // Create the sprite
     const victimSprite = new BABYLON.Sprite(`victimSprite_${index}`, spriteManager);
-    victimSprite.width = 4;  // Width in world units
-    victimSprite.height = 3; // Height in world units
+    victimSprite.width = 4;
+    victimSprite.height = 3;
     victimSprite.position = new BABYLON.Vector3(0, 0.02, -4);
 
-    // Create a transform node to act as the "victim" object
     const victim = new BABYLON.TransformNode(`victim_${index}`, scene);
     victim.position = new BABYLON.Vector3(0, 0.02, -4);
     
-    // Store sprite reference on victim
     victim.sprite = victimSprite;
-    
     victim.isPickable = false;
     victim.maxHealth = 200;
     victim.currentHealth = 0;
     victim.drainRate = 0;
     victim.isDead = false;
+    
+    // Shake animation properties
+    victim.isShaking = false;
+    victim.originalPosition = victim.position.clone();
 
-    // Create health bar for this victim
     const healthBarWidth = 2;
     const healthBarHeight = 0.3;
     
-    // Background bar (red)
     victim.healthBarBg = BABYLON.MeshBuilder.CreatePlane(`healthBarBg_${index}`, {
         width: healthBarWidth,
         height: healthBarHeight
@@ -51,7 +49,6 @@ export function createVictim(scene, index = 0) {
     bgMaterial.emissiveColor = new BABYLON.Color3(0.3, 0, 0);
     victim.healthBarBg.material = bgMaterial;
     
-    // Foreground bar (green)
     victim.healthBarFg = BABYLON.MeshBuilder.CreatePlane(`healthBarFg_${index}`, {
         width: healthBarWidth,
         height: healthBarHeight
@@ -66,31 +63,66 @@ export function createVictim(scene, index = 0) {
     
     victim.healthBarWidth = healthBarWidth;
     
-    // Update health bar position and fill
+    // Shake animation function
+    victim.shake = function() {
+        if (this.isShaking) return;
+        
+        this.isShaking = true;
+        const shakeIntensity = 0.5;
+        const shakeDuration = 500;
+        const shakeFrequency = 40;
+        const startTime = Date.now();
+        
+        // Store the CURRENT position at shake start, not the original
+        const shakeStartX = this.position.x;
+        const shakeStartY = this.position.y;
+        
+        const shakeInterval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const progress = elapsed / shakeDuration;
+            
+            if (progress >= 1) {
+                // Reset to shake start position
+                this.position.x = shakeStartX;
+                this.position.y = shakeStartY;
+                this.isShaking = false;
+                clearInterval(shakeInterval);
+                this.updateHealthBar();
+                return;
+            }
+            
+            const dampen = 1 - progress;
+            
+            const offsetX = (Math.random() - 0.5) * shakeIntensity * dampen;
+            const offsetY = (Math.random() - 0.5) * shakeIntensity * dampen;
+            
+            // Shake around the shake start position, not originalPosition
+            this.position.x = shakeStartX + offsetX;
+            this.position.y = shakeStartY + offsetY;
+            
+            this.updateHealthBar();
+        }, 1000 / shakeFrequency);
+    };
+    
     victim.updateHealthBar = function() {
-        // Position health bar above victim
         this.healthBarBg.position.x = this.position.x;
-        this.healthBarBg.position.y = this.position.y + 2.5; // Adjusted for sprite height
+        this.healthBarBg.position.y = this.position.y + 2.5;
         this.healthBarBg.position.z = this.position.z - 1.5;
         
         this.healthBarFg.position.x = this.position.x;
         this.healthBarFg.position.y = this.position.y + 2.6;
         this.healthBarFg.position.z = this.position.z - 1.5;
         
-        // Update sprite position to match victim
         this.sprite.position.x = this.position.x;
         this.sprite.position.y = this.position.y;
         this.sprite.position.z = this.position.z;
         
-        // Update fill based on health
         const healthPercent = Math.max(0, this.currentHealth / this.maxHealth);
         this.healthBarFg.scaling.x = healthPercent || 0.001;
         
-        // Offset to fill from left
         const offset = (this.healthBarWidth * (1 - healthPercent)) / 2;
         this.healthBarFg.position.x = this.position.x - offset;
         
-        // Change color based on health
         if (healthPercent > 0.5) {
             this.fgMaterial.diffuseColor = new BABYLON.Color3(0, 1, 0);
         } else if (healthPercent > 0.25) {
@@ -100,13 +132,17 @@ export function createVictim(scene, index = 0) {
         }
     };
     
-    // Modify health helper
     victim.modifyHealth = function(amount) {
         this.currentHealth = Math.max(0, Math.min(this.maxHealth, this.currentHealth + amount));
+        
+        // Trigger shake on damage (negative amount)
+        if (amount < 0) {
+            this.shake();
+        }
+        
         this.updateHealthBar();
     };
     
-    // Override isVisible to control sprite visibility
     Object.defineProperty(victim, 'isVisible', {
         get: function() {
             return this.sprite.isVisible;
@@ -116,7 +152,6 @@ export function createVictim(scene, index = 0) {
         }
     });
     
-    // Hide initially
     victim.isVisible = false;
     victim.healthBarBg.isVisible = false;
     victim.healthBarFg.isVisible = false;
