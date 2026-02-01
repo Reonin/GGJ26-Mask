@@ -25,11 +25,11 @@ export class TypingTest {
 
         // Tool image paths
         this.toolImages = {
-            garlic: "../assets/tools/garlic.svg",
-            rosaries: "../assets/tools/rosaries.svg",
-            cross: "../assets/tools/cross.svg",
-            holyWater: "../assets/tools/holyWater.svg",
-            scalpel: "../assets/tools/scalpel.svg"
+            garlic: "./assets/tools/garlic.svg",
+            rosaries: "./assets/tools/rosaries.svg",
+            cross: "./assets/tools/cross.svg",
+            holyWater: "./assets/tools/holyWater.svg",
+            scalpel: "./assets/tools/scalpel.svg"
         };
 
 
@@ -296,9 +296,7 @@ export class TypingTest {
         const toolNames = Object.keys(this.toolImages);
         const randomTool = toolNames[Math.floor(Math.random() * toolNames.length)];
         this.currentTool = randomTool;
-        if (window.updateToolBubble) {
-            window.updateToolBubble(randomTool);
-        }
+        this.updateToolBubble(randomTool);
 
         this.renderWord();
 
