@@ -19,7 +19,8 @@ const HUD = {
     subtitle,
     currentRound,
     typingTests: {},   // now stores 3 instances
-    victimManager
+    victimManager,
+    startScreenBg: null
 };
 
 export async function setUpHUD(
@@ -38,6 +39,9 @@ export async function setUpHUD(
     );
 
     let loadedGUI = await advancedTexture.parseFromURLAsync("./json/guiTexture.json");
+
+    // Create start screen background image
+    createStartScreenBackground(advancedTexture);
 
     setUpButtons(advancedTexture, buttonList, light, victimManagerRef);
     createMuteButton(advancedTexture);
@@ -60,6 +64,19 @@ export async function setUpHUD(
     setupVictimHealing(scene, HUD.typingTests, HUD.victimManager);
 
     return HUD;
+}
+
+function createStartScreenBackground(advancedTexture) {
+    const bgImage = new BABYLON.GUI.Image("startScreenBg", "./assets/plaguearism.png");
+    bgImage.width = "100%";
+    bgImage.height = "100%";
+    bgImage.stretch = BABYLON.GUI.Image.STRETCH_UNIFORM;
+    bgImage.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    bgImage.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    bgImage.zIndex = -1; // Behind other elements
+
+    advancedTexture.addControl(bgImage);
+    HUD.startScreenBg = bgImage;
 }
 
 function setUpButtons(advancedTexture, buttonList, light, victimManager) {
@@ -189,6 +206,7 @@ export function resetToDefault() {
     HUD.title.isVisible = true;
     HUD.subtitle.isVisible = true;
     buttonList.startGameButton.isVisible = true;
+    if (HUD.startScreenBg) HUD.startScreenBg.isVisible = true;
 
     HUD.title.text = "Restarting Game in 5 seconds";
     setTimeout(function() {
@@ -219,6 +237,7 @@ export function hideTitleScreen(light) {
     HUD.subtitle.isVisible = false;
     window.gameStarted = true;
     buttonList.startGameButton.isVisible = false;
+    if (HUD.startScreenBg) HUD.startScreenBg.isVisible = false;
 
     light.width = 30;
     light.intensity = 1.55;
