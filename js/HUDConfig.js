@@ -208,6 +208,11 @@ export function resetToDefault() {
     buttonList.startGameButton.isVisible = true;
     if (HUD.startScreenBg) HUD.startScreenBg.isVisible = true;
 
+    HUD.title.text = "Restarting Game in 5 seconds";
+    setTimeout(function() {
+        window.location.reload();
+    }, 5000);
+
     Object.values(HUD.typingTests).forEach(test => {
         test.resetPosition();
         test.stopTest();
