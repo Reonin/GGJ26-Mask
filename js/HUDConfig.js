@@ -179,7 +179,7 @@ function setupTimer(scene, engine, target) {
                 console.log("%cGame Over - Time's Up!", "color: red; font-size: 24px;");
             }
             else {
-                target.text = `Patients: ${HUD.victimManager ? HUD.victimManager.getVictimCount() : 0}/3`;
+                target.text = `Villagers: ${HUD.victimManager ? HUD.victimManager.getVictimCount() : 0}/3`;
             }
         }
     });
