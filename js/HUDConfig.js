@@ -92,7 +92,9 @@ function setUpButtons(advancedTexture, buttonList, light, victimManager) {
     });
 
     buttonList.startGameButton.onPointerOutObservable.add(() => {
-        document.body.style.cursor = "none";
+        if(window.gameStarted){
+			document.body.style.cursor = "none";
+		}
     });
 }
 
