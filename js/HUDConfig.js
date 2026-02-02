@@ -118,14 +118,6 @@ function createMuteButton(advancedTexture) {
         }
     });
 
-    muteButton.onPointerEnterObservable.add(() => {
-        document.body.style.cursor = "pointer";
-    });
-
-    muteButton.onPointerOutObservable.add(() => {
-        document.body.style.cursor = "none";
-    });
-
     advancedTexture.addControl(muteButton);
 }
 
@@ -243,7 +235,6 @@ export function hideTitleScreen(light) {
 
     light.width = 30;
     light.intensity = 1.55;
-     document.body.style.cursor = "none";
 
     // Start typing tests with staggered delays so words don't all fall at once
     Object.values(HUD.typingTests).forEach((test, index) => {
